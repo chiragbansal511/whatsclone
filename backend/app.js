@@ -15,6 +15,7 @@ server.listen(PORT, () => {
 
 io.on('connection', (socket) => {
     console.log('A new client connected: ' + socket.id);
+    io.to(socket.id).emit("message" , `your id is ${socket.id}`);
     socket.on('sendToMe', (data) => {
         console.log('Received data from client:', data);
         socket.emit('message', 'This is a message just for you!');
