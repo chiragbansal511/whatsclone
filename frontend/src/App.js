@@ -1,16 +1,22 @@
-import io from 'socket.io-client'; 
-
-const socket = io('http://localhost:80', {
-  transports: ['websocket'],
-});
-socket.on('message', (data) => {
-  console.log('Received message from server:', data);
-});
+import Login from "./pages/login";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import PrivateRoute from "./components/privateroute";
+import Signup from "./pages/signup";
+import Verifyopt from "./pages/verifyotp";
 
 function App() {
+
   return (
-    <div className="App">
-    </div>
+    <>
+    <BrowserRouter>
+      <Routes>
+        <Route path="login" element={<Login />}/>
+          <Route path="signup" element={<Signup />} />
+          <Route path="verify" element={<Verifyopt/>} />
+      </Routes>
+    </BrowserRouter>
+    <PrivateRoute />
+    </>
   );
 }
 

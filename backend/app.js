@@ -43,6 +43,9 @@ function authenticateToken(req, res, next) {
     });
 }
 
+app.get("/auth" , authenticateToken , (req,res)=>{
+res.json("1");
+})
 
 app.post(('/login/getopt'), async (req, res) => {
 
@@ -93,7 +96,7 @@ app.post(('/signup/getopt'), async (req, res) => {
 });
 
 
-app.post(("/signup/verify"), async (req, res) => {
+app.post(("/signup/verifyopt"), async (req, res) => {
 
     try {
         const opt = await client.db(dbName).collection("OPTS").findOne({ email: req.body.email });
@@ -101,7 +104,7 @@ app.post(("/signup/verify"), async (req, res) => {
         if (opt.otp == req.body.opt) {
             let response = await client.db(dbName).collection("OPTS").deleteOne({ email: req.body.email });
             const accessToken = jwt.sign({ email: req.body.email }, secretKey);
-            response = await client.db(dbName).collection("account").insertOne({ email: req.body.email, socketid: null });
+            response = await client.db(dbName).collection("account").insertOne({ email: req.body.email, socketid: "offline" });
             res.json({ accessToken: accessToken });
         }
 
@@ -174,4 +177,14 @@ server.listen(PORT, () => {
 
 io.on('connection', (socket) => {
     console.log('A new client connected: ' + socket.id);
+
+    socket.on('disconnect', async () => {
+        try {
+            const email = await client.db(dbName).collection("account").findOne({socketid : socket.id});
+            const response = await client.db(dbName).collection("account").updateOne({socketid : socket.id}, { $set: { email : email.email ,socketid: "offline" } });
+           
+        } catch (error) {
+           
+        }
+    });
 });
