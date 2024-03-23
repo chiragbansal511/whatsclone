@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 
 function Home() {
     const [socketid, setSocketid] = useState("");
-    const [sender, setSender] = useState(["you"]);
+    const [sender, setSender] = useState([]);
 
     async function connectSocket() {
         if (!socketid) { // Check if socket is not already connected
@@ -21,13 +21,26 @@ function Home() {
                 });
 
                 socket.on("message", (data) => {
-                  
-                    console.log(sender, 'res'); // Log the actual value of res
-                   
-                        setSender(prevSender => [...prevSender, data.sender]); // Add sender to the list
-                   
+
+                    let list = Cookies.get("sender");
+                    if (list != null) {
+                        list = list.split(",");
+                        const res = list.find((e) => e == data.sender);
+                        if (res == null) {
+                            Cookies.set("sender", [data.sender, Cookies.get("sender")]);
+                            setSender(prevSender => [data.sender , ...prevSender]);
+                            console.log("hello")
+                        }
+                    }
+
+                    else {
+                        Cookies.set("sender" , [data.sender]);
+                        setSender([data.sender]);
+                    }
+
+                    console.log(list, "gbvbdcvbwef");
                 });
-                
+
             } catch (error) {
                 console.error('Error connecting to socket:', error);
             }
@@ -44,12 +57,12 @@ function Home() {
                 }
             });
 
-            console.log(response.data);
-            // Load sender list from cookies after setting socket
-            const savedSender = Cookies.get("sender");
-            if (savedSender) {
-                setSender(JSON.parse(savedSender));
+            let list = Cookies.get("sender");
+            if (list != null) {
+                list = list.split(",");
+                setSender(list);
             }
+
         } catch (error) {
             console.error('Error setting socket:', error);
         }
@@ -65,17 +78,13 @@ function Home() {
         }
     }, [socketid]);
 
-    useEffect(() => {
-        // Save sender list to cookies whenever it changes
-        Cookies.set("sender", sender);
-    }, [sender]);
 
     return (
         <div className="App">
             {
                 sender.map((senderName, index) => (
                     <div key={index}>
-                         {senderName}
+                        <button>{senderName}   </button>
                     </div>
                 ))
             }
