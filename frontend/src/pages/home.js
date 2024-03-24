@@ -19,42 +19,6 @@ function Home() {
                     setSocketid(socket.id);
                     console.log(socket.id , "socket id is");
                 });
-
-                socket.on("message", (data) => {
-                    const message = {
-                        type : "sender",
-                        sender : data.sender,
-                        message : data.message,
-                    }
-                    console.log(message) // delete after use 
-                    let prevmessage = Cookies.get(message.sender);
-                    if(prevmessage != null)
-                    {
-                        prevmessage = JSON.parse(prevmessage);
-                        prevmessage.push(message);
-                    }
-
-                    else {
-                        prevmessage = [message];
-                    }
-                    Cookies.set(message.sender , JSON.stringify(prevmessage));
-                    let list = Cookies.get("sender");
-                    if (list != null) {
-                        list = list.split(",");
-                        const res = list.find((e) => e == data.sender);
-                        if (res == null) {
-                            Cookies.set("sender", [data.sender, Cookies.get("sender")]);
-                            setSender(prevSender => [data.sender , ...prevSender]);
-                        }
-                    }
-
-                    else {
-                        Cookies.set("sender" , [data.sender]);
-                        setSender([data.sender]);
-                    }
-
-                });
-
             } catch (error) {
                 console.error('Error connecting to socket:', error);
             }
@@ -95,6 +59,48 @@ function Home() {
     }, [socketid]);
 
 
+    useEffect(() => {
+        const handleMessage = (data) => {
+            const message = {
+                type : "sender",
+                sender : data.sender,
+                message : data.message,
+            }
+            console.log(message) // delete after use 
+            let prevmessage = Cookies.get(message.sender);
+            if(prevmessage != undefined)
+            {
+                prevmessage = JSON.parse(prevmessage);
+                prevmessage.push(message);
+            }
+
+            else {
+                prevmessage = [message];
+            }
+            Cookies.set(message.sender , JSON.stringify(prevmessage));
+            let list = Cookies.get("sender");
+            if (list != null) {
+                list = list.split(",");
+                const res = list.find((e) => e == data.sender);
+                if (res == null) {
+                    Cookies.set("sender", [data.sender, Cookies.get("sender")]);
+                    setSender(prevSender => [data.sender , ...prevSender]);
+                }
+            }
+
+            else {
+                Cookies.set("sender" , [data.sender]);
+                setSender([data.sender]);
+            }
+        };
+
+        socket.on("message", handleMessage);
+
+        return () => {
+            socket.off("message", handleMessage);
+        };
+    }, []);
+    
     return (
         <div className="App">
             {
