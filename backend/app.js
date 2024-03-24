@@ -43,20 +43,27 @@ function authenticateToken(req, res, next) {
     });
 }
 
-app.get("/auth" , authenticateToken , (req,res)=>{
-res.json("1");
+app.get("/auth", authenticateToken, (req, res) => {
+    res.json("1");
 })
 
 app.post(('/login/getopt'), async (req, res) => {
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    const response = await client.db(dbName).collection("account").findOne({ email: req.body.email });
+    if (response == null) {
+        res.json("use not found");
+    }
 
-    try {
-        const response = await client.db(dbName).collection("OPTS").insertOne({ email: req.body.email, otp: otp });
-        // add email send code 
-        res.json("opt send");
-    } catch (error) {
-        res.json("error");
+    else {
+        const otp = Math.floor(100000 + Math.random() * 900000);
+
+        try {
+            const response = await client.db(dbName).collection("OPTS").insertOne({ email: req.body.email, otp: otp });
+            // add email send code 
+            res.json("opt send");
+        } catch (error) {
+            res.json("error");
+        }
     }
 
 })
@@ -128,41 +135,39 @@ app.post(('/setsocketid'), authenticateToken, async (req, res) => {
 })
 
 app.post(("/message"), authenticateToken, async (req, res) => {
-    
+
     try {
 
-        const response = await client.db(dbName).collection("account").findOne({email : req.body.receiver});
-        if(response == null)
-        {
+        const response = await client.db(dbName).collection("account").findOne({ email: req.body.receiver });
+        if (response == null) {
             res.json("user doesn't exist");
         }
 
-        else if(response.socketid == "offline")
-        {
-            const response = await client.db(dbName).collection(req.body.receiver).insertOne({sender : jwt.decode(req.token).email , message : req.body.message});
+        else if (response.socketid == "offline") {
+            const response = await client.db(dbName).collection(req.body.receiver).insertOne({ sender: jwt.decode(req.token).email, message: req.body.message });
             res.json("send");
         }
 
         else {
-            
+
             const data = {
-                sender : jwt.decode(req.token).email,
-                message : req.body.message
+                sender: jwt.decode(req.token).email,
+                message: req.body.message
             }
 
-            io.to(response.socketid).emit("message" , data);
+            io.to(response.socketid).emit("message", data);
             res.json("send");
         }
     }
-    
+
     catch (error) {
         res.json("error");
     }
 })
 
 
-app.get("/getmessage" , authenticateToken , async (req , res)=>{
- 
+app.get("/getmessage", authenticateToken, async (req, res) => {
+
     try {
         const response = await client.db(dbName).collection(jwt.decode(req.token).email).find({}).toArray();
         await client.db(dbName).collection(jwt.decode(req.token).email).deleteMany({});
@@ -181,11 +186,11 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', async () => {
         try {
-            const email = await client.db(dbName).collection("account").findOne({socketid : socket.id});
-            const response = await client.db(dbName).collection("account").updateOne({socketid : socket.id}, { $set: { email : email.email ,socketid: "offline" } });
-           console.log("disconnect");
+            const email = await client.db(dbName).collection("account").findOne({ socketid: socket.id });
+            const response = await client.db(dbName).collection("account").updateOne({ socketid: socket.id }, { $set: { email: email.email, socketid: "offline" } });
+            console.log("disconnect");
         } catch (error) {
-           
+
         }
     });
 });

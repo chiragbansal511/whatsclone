@@ -9,6 +9,7 @@ function Home() {
     const navigate = useNavigate();
     const [socketid, setSocketid] = useState("");
     const [sender, setSender] = useState([]);
+    const [newsender, setNewsender] = useState("");
 
     async function connectSocket() {
         if (!socketid) {
@@ -17,14 +18,14 @@ function Home() {
                 socket.on('connect', async () => {
                     console.log('Connected to server');
                     setSocketid(socket.id);
-                    console.log(socket.id , "socket id is");
+                    console.log(socket.id, "socket id is");
                 });
             } catch (error) {
                 console.error('Error connecting to socket:', error);
             }
-            
+
         }
-        
+
     }
 
     async function setSocketinbackend() {
@@ -49,10 +50,9 @@ function Home() {
     }
 
 
-    async function getstoredofflinemessage()
-    {
+    async function getstoredofflinemessage() {
         try {
-            const response = await axios.get('http://localhost:80/getmessage',  {
+            const response = await axios.get('http://localhost:80/getmessage', {
                 headers: {
                     Authorization: "Bearer " + Cookies.get("accessToken")
                 }
@@ -60,23 +60,22 @@ function Home() {
 
             response.data.forEach(element => {
                 const message = {
-                    type : "sender",
-                    sender : element.sender,
-                    message : element.message,
+                    type: "sender",
+                    sender: element.sender,
+                    message: element.message,
                 }
                 console.log(message) // delete after use 
                 let prevmessage = Cookies.get(message.sender);
-                if(prevmessage != undefined)
-                {
+                if (prevmessage != undefined) {
                     prevmessage = JSON.parse(prevmessage);
                     prevmessage.push(message);
                 }
-    
+
                 else {
                     prevmessage = [message];
                 }
-                Cookies.set(message.sender , JSON.stringify(prevmessage));
-    
+                Cookies.set(message.sender, JSON.stringify(prevmessage));
+
                 let list = Cookies.get("sender");
                 if (list != null) {
                     list = list.split(",");
@@ -85,14 +84,28 @@ function Home() {
                         Cookies.set("sender", [message.sender, Cookies.get("sender")]);
                     }
                 }
-    
+
                 else {
-                    Cookies.set("sender" , [message.sender]);
+                    Cookies.set("sender", [message.sender]);
                 }
             });
 
         } catch (error) {
-            
+
+        }
+    }
+
+    function handlesubmit() {
+        let list = Cookies.get("sender");
+        if (list != null) {
+            list = list.split(",");
+            Cookies.set("sender", [newsender, Cookies.get("sender")]);
+            setSender(prevSender => [newsender, ...prevSender]);
+        }
+
+        else {
+            Cookies.set("sender", [newsender]);
+            setSender([newsender]);
         }
     }
 
@@ -110,13 +123,12 @@ function Home() {
     useEffect(() => {
         const handleMessage = (data) => {
             const message = {
-                type : "sender",
-                sender : data.sender,
-                message : data.message,
+                type: "sender",
+                sender: data.sender,
+                message: data.message,
             }
             let prevmessage = Cookies.get(message.sender);
-            if(prevmessage != undefined)
-            {
+            if (prevmessage != undefined) {
                 prevmessage = JSON.parse(prevmessage);
                 prevmessage.push(message);
             }
@@ -124,19 +136,19 @@ function Home() {
             else {
                 prevmessage = [message];
             }
-            Cookies.set(message.sender , JSON.stringify(prevmessage));
+            Cookies.set(message.sender, JSON.stringify(prevmessage));
             let list = Cookies.get("sender");
             if (list != null) {
                 list = list.split(",");
                 const res = list.find((e) => e == data.sender);
                 if (res == null) {
                     Cookies.set("sender", [data.sender, Cookies.get("sender")]);
-                    setSender(prevSender => [data.sender , ...prevSender]);
+                    setSender(prevSender => [data.sender, ...prevSender]);
                 }
             }
 
             else {
-                Cookies.set("sender" , [data.sender]);
+                Cookies.set("sender", [data.sender]);
                 setSender([data.sender]);
             }
         };
@@ -147,17 +159,19 @@ function Home() {
             socket.off("message", handleMessage);
         };
     }, []);
-    
-    useEffect( () =>{
-      getstoredofflinemessage();
+
+    useEffect(() => {
+        getstoredofflinemessage();
     }, [])
-    
+
     return (
         <div className="App">
+            <input type="text" value={newsender} onChange={(e) => setNewsender(e.target.value)} />
+            <button onClick={handlesubmit}>Add user</button>
             {
                 sender.map((senderName, index) => (
                     <div key={index}>
-                       {senderName != "" ? <button onClick={()=>{ navigate("/sendmessage" , {state : {data : senderName }});}}>{senderName}</button> : <div></div>}
+                        {senderName != "" ? <button onClick={() => { navigate("/sendmessage", { state: { data: senderName } }); }}>{senderName}</button> : <div></div>}
                     </div>
                 ))
             }

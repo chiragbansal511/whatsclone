@@ -111,11 +111,11 @@ export default function Sendmessage() {
     return (
         <div className="container">
             {
-                message.map((e, index) => (
-                    <div key={index} className={e.type}>
-                        <div>{e.message}</div>
-                    </div>
-                ))
+               message != [] ?  message.map((e, index) => (
+                <div key={index} className={e.type}>
+                    <div>{e.message}</div>
+                </div>
+            )) : <div></div>
             }
 
             <div>send message</div>

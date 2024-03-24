@@ -17,6 +17,11 @@ export default function Login()
       });
       
       console.log(response.data);
+      if(response.data == "use not found")
+      {
+        alert("wrong Email");
+      }
+      else
       navigate("/verify" , {state : {data : email , type : "login"}});
     };
 
