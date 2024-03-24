@@ -3,26 +3,21 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { Navigate, useNavigate } from 'react-router-dom';
+import socket from '../socket';
 
 function Home() {
     const navigate = useNavigate();
     const [socketid, setSocketid] = useState("");
     const [sender, setSender] = useState([]);
-    const [socketcopy , setSocketcopy] = useState(null);
 
     async function connectSocket() {
         if (!socketid) {
             try {
-                const socket = await io('http://localhost:80', {
-                    transports: ['websocket'],
-                });
-            
-                socket.on('connect', () => {
+                socket.connect();
+                socket.on('connect', async () => {
                     console.log('Connected to server');
                     setSocketid(socket.id);
-                    console.log('Socket ID:', socket.id);
-                    console.log(socket)
-                    // after time
+                    console.log(socket.id , "socket id is");
                 });
 
                 socket.on("message", (data) => {
@@ -59,6 +54,7 @@ function Home() {
                     }
 
                 });
+
             } catch (error) {
                 console.error('Error connecting to socket:', error);
             }
@@ -104,7 +100,7 @@ function Home() {
             {
                 sender.map((senderName, index) => (
                     <div key={index}>
-                       {senderName != "" ? <button onClick={()=>{ navigate("/sendmessage" , {state : {data : senderName , socket : socketcopy}});}}>{senderName}</button> : <div></div>}
+                       {senderName != "" ? <button onClick={()=>{ navigate("/sendmessage" , {state : {data : senderName }});}}>{senderName}</button> : <div></div>}
                     </div>
                 ))
             }
