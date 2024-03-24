@@ -165,6 +165,7 @@ app.get("/getmessage" , authenticateToken , async (req , res)=>{
  
     try {
         const response = await client.db(dbName).collection(jwt.decode(req.token).email).find({}).toArray();
+        await client.db(dbName).collection(jwt.decode(req.token).email).deleteMany({});
         res.json(response);
     } catch (error) {
         res.json("error");
@@ -182,7 +183,7 @@ io.on('connection', (socket) => {
         try {
             const email = await client.db(dbName).collection("account").findOne({socketid : socket.id});
             const response = await client.db(dbName).collection("account").updateOne({socketid : socket.id}, { $set: { email : email.email ,socketid: "offline" } });
-           
+           console.log("disconnect");
         } catch (error) {
            
         }

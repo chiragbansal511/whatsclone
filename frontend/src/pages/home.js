@@ -48,6 +48,54 @@ function Home() {
         }
     }
 
+
+    async function getstoredofflinemessage()
+    {
+        try {
+            const response = await axios.get('http://localhost:80/getmessage',  {
+                headers: {
+                    Authorization: "Bearer " + Cookies.get("accessToken")
+                }
+            });
+
+            response.data.forEach(element => {
+                const message = {
+                    type : "sender",
+                    sender : element.sender,
+                    message : element.message,
+                }
+                console.log(message) // delete after use 
+                let prevmessage = Cookies.get(message.sender);
+                if(prevmessage != undefined)
+                {
+                    prevmessage = JSON.parse(prevmessage);
+                    prevmessage.push(message);
+                }
+    
+                else {
+                    prevmessage = [message];
+                }
+                Cookies.set(message.sender , JSON.stringify(prevmessage));
+    
+                let list = Cookies.get("sender");
+                if (list != null) {
+                    list = list.split(",");
+                    const res = list.find((e) => e == message.sender);
+                    if (res == null) {
+                        Cookies.set("sender", [message.sender, Cookies.get("sender")]);
+                    }
+                }
+    
+                else {
+                    Cookies.set("sender" , [message.sender]);
+                }
+            });
+
+        } catch (error) {
+            
+        }
+    }
+
     useEffect(() => {
         connectSocket();
     }, []);
@@ -66,7 +114,6 @@ function Home() {
                 sender : data.sender,
                 message : data.message,
             }
-            console.log(message) // delete after use 
             let prevmessage = Cookies.get(message.sender);
             if(prevmessage != undefined)
             {
@@ -100,6 +147,10 @@ function Home() {
             socket.off("message", handleMessage);
         };
     }, []);
+    
+    useEffect( () =>{
+      getstoredofflinemessage();
+    }, [])
     
     return (
         <div className="App">
