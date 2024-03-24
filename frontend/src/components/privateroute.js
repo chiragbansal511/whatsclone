@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Home from "../pages/home";
+import Sendmessage from "../pages/sendmessage";
 
 async function authorizationuser() {
     const response = await axios.get('http://localhost:80/auth', {
@@ -34,6 +35,7 @@ export default function PrivateRoute() {
                     <Routes>
                         <Route path="home" element={<Home />} />
                         <Route index element={<Home />} />
+                        <Route path="sendmessage" element={<Sendmessage />} />
                         <Route />
                     </Routes>
                 </BrowserRouter>
