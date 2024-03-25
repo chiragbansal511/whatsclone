@@ -12,7 +12,7 @@ export default function Addgroup(props) {
     useEffect(() => {
         let list = localStorage.getItem("sender");
         if (list != null) {
-            list = list.split(",");
+            list = JSON.parse(list);
             setList(list);
         }
 
@@ -43,7 +43,7 @@ export default function Addgroup(props) {
             {
                 !datacompo ? list.map((e, index) => (
                     <div key={index}>
-                        <div onClick={() => setMembers(prevMembers => [e, ...prevMembers])}>{e}</div>
+                        <div onClick={() => setMembers(prevMembers => [{sender : e.sender , messagetype : "group"}, ...prevMembers])}>{e.sender}</div>
                     </div>
                 )) : <div>
                     <input type="text" value={groupdataname} onChange={(e) => setGroupdataname(e.target.value)} />
@@ -54,4 +54,3 @@ export default function Addgroup(props) {
     )
 }
 
-// setDatacompo(!datacompo)

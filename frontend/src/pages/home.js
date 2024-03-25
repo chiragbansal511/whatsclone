@@ -10,8 +10,8 @@ function Home() {
     const [socketid, setSocketid] = useState("");
     const [sender, setSender] = useState([]);
     const [newsender, setNewsender] = useState("");
-    const [newgroup , setNewgroup] = useState("");
     const [groupcompoactive , setGroupcompoactive] = useState(false);
+    const [newgroup , setNewgroup] = useState("");
     const [file , setFile] = useState();
 
     async function connectSocket() {
@@ -40,7 +40,7 @@ function Home() {
 
             let list = localStorage.getItem("sender");
             if (list != null) {
-                list = list.split(",");
+                list = JSON.parse(list);
                 setSender(list);
             }
 
@@ -63,8 +63,11 @@ function Home() {
                     type: "sender",
                     sender: element.sender,
                     message: element.message,
-                    name : element.name
+                    name : element.name,
+                    messagetype : element.messagetype,
+                    messagefor : element.messagefor
                 }
+
                 let prevmessage = localStorage.getItem(message.sender);
                 if (prevmessage != undefined) {
                     prevmessage = JSON.parse(prevmessage);
@@ -78,16 +81,18 @@ function Home() {
 
                 let list = localStorage.getItem("sender");
                 if (list != null) {
-                    list = list.split(",");
-                    const res = list.find((e) => e == message.sender);
+                    list = JSON.parse(list);
+                    const res = list.find((e) => e.sender == message.sender);
                     if (res == null) {
-                        localStorage.setItem("sender", [message.sender, localStorage.getItem("sender")]);
+                        list.push({sender : message.sender , messagefor : message.messagefor});     
                     }
                 }
 
                 else {
-                    localStorage.setItem("sender", [message.sender]);
+                    list = [{sender : message.sender , messagefor : message.messagefor}];
                 }
+
+                localStorage.setItem("sender", JSON.stringify(list));
             });
 
         } catch (error) {
@@ -98,15 +103,17 @@ function Home() {
     function handlesubmit() {
         let list = localStorage.getItem("sender");
         if (list != null) {
-            list = list.split(",");
-            localStorage.setItem("sender", [newsender, localStorage.getItem("sender")]);
-            setSender(prevSender => [newsender, ...prevSender]);
+            list = JSON.parse(list);
+            list.push({sender : newsender , messagetype : "individual"})
+            setSender(prevSender => [{sender : newsender , messagetype : "individual"}, ...prevSender]);
         }
 
         else {
-            localStorage.setItem("sender", [newsender]);
-            setSender([newsender]);
+           list = [{sender : newsender , messagetype : "individual"}];
+           setSender([{sender : newsender , messagetype : "individual"}]);
         }
+
+        localStorage.setItem("sender", JSON.stringify(list));
     }
 
     function handlegroupcomactive()
@@ -131,8 +138,11 @@ function Home() {
                 type: "sender",
                 sender: data.sender,
                 message: data.message,
-                name: data.name
+                name: data.name,
+                messagetype : data.messagetype,
+                messagefor : data.messagefor
             }
+
             let prevmessage = localStorage.getItem(message.sender);
             if (prevmessage != undefined) {
                 prevmessage = JSON.parse(prevmessage);
@@ -142,21 +152,24 @@ function Home() {
             else {
                 prevmessage = [message];
             }
+
             localStorage.setItem(message.sender, JSON.stringify(prevmessage));
+            
             let list = localStorage.getItem("sender");
             if (list != null) {
-                list = list.split(",");
-                const res = list.find((e) => e == data.sender);
-                if (res == null) {
-                    localStorage.setItem("sender", [data.sender, localStorage.getItem("sender")]);
-                    setSender(prevSender => [data.sender, ...prevSender]);
+                list = JSON.parse(list);
+                const res = list.find((e) => e.sender == data.sender);
+                if (res == null) { 
+                    list.push({sender : message.sender , messagefor : message.messagefor});
+                    setSender(prevSender => [{sender : message.sender , messagefor : message.messagefor}, ...prevSender]);
                 }
             }
 
             else {
-                localStorage.setItem("sender", [data.sender]);
-                setSender([data.sender]);
+                list = [{sender : message.sender , messagefor : message.messagefor}];
+                setSender([{sender : message.sender , messagefor : message.messagefor}]);
             }
+            localStorage.setItem("sender", JSON.stringify(list));
         };
 
         socket.on("message", handleMessage);
@@ -181,7 +194,7 @@ function Home() {
                 {
                     sender.map((senderName, index) => (
                         <div key={index}>
-                            {senderName != "" ? <button onClick={() => { Cookies.set("select", senderName); window.location.reload() }}>{senderName}</button>
+                            {senderName.sender != "" ? <button onClick={() => { Cookies.set("select", JSON.stringify(senderName)); window.location.reload() }}>{senderName.sender}</button>
                                 : <div></div>}
                         </div>
                     ))

@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const { MongoClient } = require('mongodb');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
-const { group } = require("console");
 
 
 const PORT = 80;
@@ -18,7 +17,6 @@ url = "mongodb://0.0.0.0:27017/";
 const client = new MongoClient(url);
 const secretKey = 'your_secret_key';
 const dbName = 'whatsapp';
-const saltRounds = 2;
 app.use(bodyParser.json());
 
 
@@ -44,7 +42,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-async function sendmessage(receiver , message , sender , res , name)
+async function sendmessage(receiver , message , sender , res , name , messagetype , messagefor)
 {
     try {
         const response = await client.db(dbName).collection("account").findOne({ email:receiver });
@@ -54,7 +52,7 @@ async function sendmessage(receiver , message , sender , res , name)
         }
 
         else if (response.socketid == "offline") {
-            const response = await client.db(dbName).collection(receiver).insertOne({ sender: sender, message: message , name: name});
+            const response = await client.db(dbName).collection(receiver).insertOne({ sender: sender, message: message , name: name , messagetype : messagetype , messagefor : messagefor});
         }
 
         else {
@@ -62,7 +60,9 @@ async function sendmessage(receiver , message , sender , res , name)
             const data = {
                 sender: sender,
                 message: message,
-                name : name
+                name : name,
+                messagetype : messagetype,
+                messagefor : messagefor
             }
             io.to(response.socketid).emit("message", data);
         }
@@ -70,6 +70,7 @@ async function sendmessage(receiver , message , sender , res , name)
 
     catch (error) {
         res.json("error");
+        console.log("errorororo" , error)
     }
 
 }
@@ -167,21 +168,21 @@ app.post(('/setsocketid'), authenticateToken, async (req, res) => {
 
 app.post(("/message"), authenticateToken, async (req, res) => {
 
-    const response = await client.db(dbName).collection('group').findOne({name : req.body.receiver});
-
-    if(response == null)
+    if(req.body.messagefor != "group")
    { 
-    sendmessage(req.body.receiver , req.body.message , jwt.decode(req.token).email , res ,jwt.decode(req.token).email );
+    sendmessage(req.body.receiver , req.body.message , jwt.decode(req.token).email , res ,jwt.decode(req.token).email , req.body.messagetype , "individual");
    }
 
     else {
+        const response =  await client.db(dbName).collection('group').findOne({name : req.body.receiver});
+
         response.members.forEach(element => {
-            if(element != jwt.decode(req.token).email  )
-            sendmessage(element , req.body.message , response.name , res , jwt.decode(req.token).email)
+            if(element.sender != jwt.decode(req.token).email  )
+            sendmessage(element.sender , req.body.message , response.name , res , jwt.decode(req.token).email , req.body.messagetype , "group");
         });
 
         if(response.admin != jwt.decode(req.token).email)
-     sendmessage(response.admin , req.body.message , response.name , res , jwt.decode(req.token).email) 
+     sendmessage(response.admin , req.body.message , response.name , res , jwt.decode(req.token).email , req.body.messagetype , "group") 
     }
 
     res.json("send");
@@ -212,10 +213,10 @@ app.post(("/group"), authenticateToken, async (req, res) => {
 
         group.members.forEach(element => {
             console.log(element);
-            sendmessage(element , `Hey come in my Group ${group.name}` , group.name , res , group.admin)
+            sendmessage(element.sender , `Hey come in my Group ${group.name}` , group.name , res , group.admin , "text" , "group")
             console.log("hello");
         });
-        sendmessage(group.admin , `You are group Admin of ${group.name}` , group.name , res , "Whatsapp");
+        sendmessage(group.admin , `You are group Admin of ${group.name}` , group.name , res , "Whatsapp" , "text" , "group");
         console.log("hello world");
         res.json("maked");
     } catch (error) {
@@ -223,7 +224,6 @@ app.post(("/group"), authenticateToken, async (req, res) => {
     }
 });
 
-app.post("")
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
@@ -235,7 +235,7 @@ io.on('connection', (socket) => {
         try {
             const email = await client.db(dbName).collection("account").findOne({ socketid: socket.id });
             const response = await client.db(dbName).collection("account").updateOne({ socketid: socket.id }, { $set: { email: email.email, socketid: "offline" } });
-            console.log("disconnect");
+            console.log(`disconnect socket ${socket.id}`);
         } catch (error) {
 
         }
