@@ -2,8 +2,26 @@
     display: flex;
     flex-direction: column;
     background-color: aqua;
+    height: 100vh;
+    padding: 10px;
 }
 
 .receiver{
     align-self: flex-end;
+}
+
+.App{
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+.App1{
+    width: 25vw;
+    height: 100vh;
+}
+
+.App2{
+    width: 75vw;
+    height: 100vh;
 }

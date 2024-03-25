@@ -1,4 +1,3 @@
-import { useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useState, useEffect } from "react";
 import socket from "../socket";
@@ -6,10 +5,10 @@ import axios from "axios";
 import "./index.css";
 
 export default function Sendmessage() {
-    const location = useLocation();
-    const sender = location.state.data;
+    const sender = Cookies.get("select");
     const [message, setMessage] = useState([]);
     const [sendmessage, setSendmessage] = useState("");
+    const [postImage,setPostImage] = useState();
 
     async function handlesubmit() {
         try {
@@ -29,7 +28,7 @@ export default function Sendmessage() {
                 message: sendmessage,
             }
 
-            let prevmessage = Cookies.get(message.sender);
+            let prevmessage = localStorage.getItem(message.sender);
             if (prevmessage != undefined) {
                 prevmessage = JSON.parse(prevmessage);
                 prevmessage.push(message);
@@ -38,8 +37,8 @@ export default function Sendmessage() {
             else {
                 prevmessage = [message];
             }
-            Cookies.set(message.sender, JSON.stringify(prevmessage));
-            setMessage(prevMessages => [...prevMessages, { message: sendmessage, type: "receiver" }]);
+            localStorage.setItem(message.sender, JSON.stringify(prevmessage));
+            setMessage(prevMessages => [...prevMessages, { message: sendmessage, type: "receiver" , sender: "you"}]);
             setSendmessage("");
             console.log(response);
         } catch (error) {
@@ -47,15 +46,32 @@ export default function Sendmessage() {
         }
     }
 
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const fileReader = new FileReader();
+          fileReader.readAsDataURL(file);
+          fileReader.onload = () => {
+            resolve(fileReader.result);
+          };
+          fileReader.onerror = (error) => {
+            reject(error);
+          };
+        });
+      };
+
+      const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        const base64 = await convertToBase64(file);
+        setPostImage({ ...postImage, myFile: base64 });
+        console.log(postImage)
+      };
+
+
     useEffect(() => {
-        let data = Cookies.get(sender);
+        let data = localStorage.getItem(sender);
         if (data != undefined) {
             data = JSON.parse(data);
-            let datamessage = [];
-            data.forEach(element => {
-                datamessage.push({ message: element.message, type: element.type });
-            });
-            setMessage(datamessage);
+            setMessage(data);
         }
         else setMessage("");
     }, [])
@@ -67,9 +83,10 @@ export default function Sendmessage() {
                 type: "sender",
                 sender: data.sender,
                 message: data.message,
+                name : data.name
             }
 
-            let prevmessage = Cookies.get(message.sender);
+            let prevmessage = localStorage.getItem(message.sender);
             if (prevmessage != undefined) {
                 prevmessage = JSON.parse(prevmessage);
                 prevmessage.push(message);
@@ -78,25 +95,10 @@ export default function Sendmessage() {
             else {
                 prevmessage = [message];
             }
-            Cookies.set(message.sender, JSON.stringify(prevmessage));
-
-            let list = Cookies.get("sender");
-            if (list != null) {
-                list = list.split(",");
-                const res = list.find((e) => e == data.sender);
-                if (res == null) {
-                    Cookies.set("sender", [data.sender, Cookies.get("sender")]);
-                }
-            }
-
-            else {
-                Cookies.set("sender", [data.sender]);
-            }
-
-
+           
             if (data.sender === sender) {
 
-                setMessage(prevMessages => [...prevMessages, { message: data.message, type: "sender" }]);
+                setMessage(prevMessages => [...prevMessages, message]);
             }
         };
 
@@ -110,9 +112,10 @@ export default function Sendmessage() {
 
     return (
         <div className="container">
-            {
+                  {
                message != [] ?  message.map((e, index) => (
                 <div key={index} className={e.type}>
+                    {e.type == "receiver" ? <div>you</div> : <div>{e.name}</div>}
                     <div>{e.message}</div>
                 </div>
             )) : <div></div>
@@ -120,6 +123,7 @@ export default function Sendmessage() {
 
             <div>send message</div>
             <input type="text" value={sendmessage} onChange={(e) => setSendmessage(e.target.value)} />
+            <input type="file" name="image" id='file' accept='.jpeg , .png , .jpg' onChange={(e)=>{handleFileUpload(e)}}/>
             <button onClick={handlesubmit}>send</button>
         </div>
     )

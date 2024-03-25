@@ -1,15 +1,18 @@
-import io from 'socket.io-client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import socket from '../socket';
+import Sendmessage from './sendmessage';
+import Addgroup from '../components/addgroup';
 
 function Home() {
-    const navigate = useNavigate();
     const [socketid, setSocketid] = useState("");
     const [sender, setSender] = useState([]);
     const [newsender, setNewsender] = useState("");
+    const [newgroup , setNewgroup] = useState("");
+    const [groupcompoactive , setGroupcompoactive] = useState(false);
+    const [file , setFile] = useState();
 
     async function connectSocket() {
         if (!socketid) {
@@ -23,11 +26,8 @@ function Home() {
             } catch (error) {
                 console.error('Error connecting to socket:', error);
             }
-
         }
-
     }
-
     async function setSocketinbackend() {
         try {
             const response = await axios.post('http://localhost:80/setsocketid', {
@@ -38,7 +38,7 @@ function Home() {
                 }
             });
 
-            let list = Cookies.get("sender");
+            let list = localStorage.getItem("sender");
             if (list != null) {
                 list = list.split(",");
                 setSender(list);
@@ -63,9 +63,9 @@ function Home() {
                     type: "sender",
                     sender: element.sender,
                     message: element.message,
+                    name : element.name
                 }
-                console.log(message) // delete after use 
-                let prevmessage = Cookies.get(message.sender);
+                let prevmessage = localStorage.getItem(message.sender);
                 if (prevmessage != undefined) {
                     prevmessage = JSON.parse(prevmessage);
                     prevmessage.push(message);
@@ -74,19 +74,19 @@ function Home() {
                 else {
                     prevmessage = [message];
                 }
-                Cookies.set(message.sender, JSON.stringify(prevmessage));
+                localStorage.setItem(message.sender, JSON.stringify(prevmessage));
 
-                let list = Cookies.get("sender");
+                let list = localStorage.getItem("sender");
                 if (list != null) {
                     list = list.split(",");
                     const res = list.find((e) => e == message.sender);
                     if (res == null) {
-                        Cookies.set("sender", [message.sender, Cookies.get("sender")]);
+                        localStorage.setItem("sender", [message.sender, localStorage.getItem("sender")]);
                     }
                 }
 
                 else {
-                    Cookies.set("sender", [message.sender]);
+                    localStorage.setItem("sender", [message.sender]);
                 }
             });
 
@@ -96,17 +96,22 @@ function Home() {
     }
 
     function handlesubmit() {
-        let list = Cookies.get("sender");
+        let list = localStorage.getItem("sender");
         if (list != null) {
             list = list.split(",");
-            Cookies.set("sender", [newsender, Cookies.get("sender")]);
+            localStorage.setItem("sender", [newsender, localStorage.getItem("sender")]);
             setSender(prevSender => [newsender, ...prevSender]);
         }
 
         else {
-            Cookies.set("sender", [newsender]);
+            localStorage.setItem("sender", [newsender]);
             setSender([newsender]);
         }
+    }
+
+    function handlegroupcomactive()
+    {
+        setGroupcompoactive(!groupcompoactive);
     }
 
     useEffect(() => {
@@ -126,8 +131,9 @@ function Home() {
                 type: "sender",
                 sender: data.sender,
                 message: data.message,
+                name: data.name
             }
-            let prevmessage = Cookies.get(message.sender);
+            let prevmessage = localStorage.getItem(message.sender);
             if (prevmessage != undefined) {
                 prevmessage = JSON.parse(prevmessage);
                 prevmessage.push(message);
@@ -136,19 +142,19 @@ function Home() {
             else {
                 prevmessage = [message];
             }
-            Cookies.set(message.sender, JSON.stringify(prevmessage));
-            let list = Cookies.get("sender");
+            localStorage.setItem(message.sender, JSON.stringify(prevmessage));
+            let list = localStorage.getItem("sender");
             if (list != null) {
                 list = list.split(",");
                 const res = list.find((e) => e == data.sender);
                 if (res == null) {
-                    Cookies.set("sender", [data.sender, Cookies.get("sender")]);
+                    localStorage.setItem("sender", [data.sender, localStorage.getItem("sender")]);
                     setSender(prevSender => [data.sender, ...prevSender]);
                 }
             }
 
             else {
-                Cookies.set("sender", [data.sender]);
+                localStorage.setItem("sender", [data.sender]);
                 setSender([data.sender]);
             }
         };
@@ -166,15 +172,26 @@ function Home() {
 
     return (
         <div className="App">
-            <input type="text" value={newsender} onChange={(e) => setNewsender(e.target.value)} />
-            <button onClick={handlesubmit}>Add user</button>
-            {
-                sender.map((senderName, index) => (
-                    <div key={index}>
-                        {senderName != "" ? <button onClick={() => { navigate("/sendmessage", { state: { data: senderName } }); }}>{senderName}</button> : <div></div>}
-                    </div>
-                ))
+           <div className='App1'>
+           {
+                !groupcompoactive ? <div className=''>
+                <input type="text" value={newsender} onChange={(e) => setNewsender(e.target.value)} />
+                <button onClick={handlesubmit}>Add user</button>
+                <button onClick={handlegroupcomactive}>New group</button>
+                {
+                    sender.map((senderName, index) => (
+                        <div key={index}>
+                            {senderName != "" ? <button onClick={() => { Cookies.set("select", senderName); window.location.reload() }}>{senderName}</button>
+                                : <div></div>}
+                        </div>
+                    ))
+                }
+            </div> : <div><Addgroup  handlegroupcomactive={handlegroupcomactive}/></div>
             }
+
+           </div>
+
+            <div className='App2'> <Sendmessage /></div>
         </div>
     );
 }

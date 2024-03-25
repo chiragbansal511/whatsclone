@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { MongoClient } = require('mongodb');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
+const { group } = require("console");
 
 
 const PORT = 80;
@@ -41,6 +42,36 @@ function authenticateToken(req, res, next) {
         req.token = token;
         next();
     });
+}
+
+async function sendmessage(receiver , message , sender , res , name)
+{
+    try {
+        const response = await client.db(dbName).collection("account").findOne({ email:receiver });
+        if (response == null) {
+            res.json("user doesn't exist");
+            console.log("1");
+        }
+
+        else if (response.socketid == "offline") {
+            const response = await client.db(dbName).collection(receiver).insertOne({ sender: sender, message: message , name: name});
+        }
+
+        else {
+
+            const data = {
+                sender: sender,
+                message: message,
+                name : name
+            }
+            io.to(response.socketid).emit("message", data);
+        }
+    }
+
+    catch (error) {
+        res.json("error");
+    }
+
 }
 
 app.get("/auth", authenticateToken, (req, res) => {
@@ -136,33 +167,24 @@ app.post(('/setsocketid'), authenticateToken, async (req, res) => {
 
 app.post(("/message"), authenticateToken, async (req, res) => {
 
-    try {
+    const response = await client.db(dbName).collection('group').findOne({name : req.body.receiver});
 
-        const response = await client.db(dbName).collection("account").findOne({ email: req.body.receiver });
-        if (response == null) {
-            res.json("user doesn't exist");
-        }
+    if(response == null)
+   { 
+    sendmessage(req.body.receiver , req.body.message , jwt.decode(req.token).email , res ,jwt.decode(req.token).email );
+   }
 
-        else if (response.socketid == "offline") {
-            const response = await client.db(dbName).collection(req.body.receiver).insertOne({ sender: jwt.decode(req.token).email, message: req.body.message });
-            res.json("send");
-        }
+    else {
+        response.members.forEach(element => {
+            if(element != jwt.decode(req.token).email  )
+            sendmessage(element , req.body.message , response.name , res , jwt.decode(req.token).email)
+        });
 
-        else {
-
-            const data = {
-                sender: jwt.decode(req.token).email,
-                message: req.body.message
-            }
-
-            io.to(response.socketid).emit("message", data);
-            res.json("send");
-        }
+        if(response.admin != jwt.decode(req.token).email)
+     sendmessage(response.admin , req.body.message , response.name , res , jwt.decode(req.token).email) 
     }
 
-    catch (error) {
-        res.json("error");
-    }
+    res.json("send");
 })
 
 
@@ -177,6 +199,31 @@ app.get("/getmessage", authenticateToken, async (req, res) => {
     }
 })
 
+app.post(("/group"), authenticateToken, async (req, res) => {
+    const group = {
+        admin: jwt.decode(req.token).email,
+        name : req.body.name,
+        members: req.body.members,
+        mode: "send"
+    }
+
+    try {
+        const response = await client.db(dbName).collection("group").insertOne(group);
+
+        group.members.forEach(element => {
+            console.log(element);
+            sendmessage(element , `Hey come in my Group ${group.name}` , group.name , res , group.admin)
+            console.log("hello");
+        });
+        sendmessage(group.admin , `You are group Admin of ${group.name}` , group.name , res , "Whatsapp");
+        console.log("hello world");
+        res.json("maked");
+    } catch (error) {
+        res.json(error);
+    }
+});
+
+app.post("")
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
