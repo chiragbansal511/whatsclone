@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
 import socket from '../socket';
 import Sendmessage from './sendmessage';
 import Addgroup from '../components/addgroup';
+import Status from '../components/status';
 
 function Home() {
     const [socketid, setSocketid] = useState("");
     const [sender, setSender] = useState([]);
     const [newsender, setNewsender] = useState("");
     const [groupcompoactive, setGroupcompoactive] = useState(false);
-    const [newgroup, setNewgroup] = useState("");
-    const [file, setFile] = useState();
 
     async function connectSocket() {
         if (!socketid) {
@@ -274,6 +272,7 @@ function Home() {
             </div>
 
             <div className='App2'> <Sendmessage /></div>
+            {/* <div className=''><Status /></div> */}
         </div>
     );
 }

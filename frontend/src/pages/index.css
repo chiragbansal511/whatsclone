@@ -25,3 +25,7 @@
     width: 75vw;
     height: 100vh;
 }
+
+.status{
+    display: none;
+}
