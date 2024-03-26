@@ -42,17 +42,16 @@ function authenticateToken(req, res, next) {
     });
 }
 
-async function sendmessage(receiver , message , sender , res , name , messagetype , messagefor)
-{
+async function sendmessage(receiver, message, sender, res, name, messagetype, messagefor) {
     try {
-        const response = await client.db(dbName).collection("account").findOne({ email:receiver });
+        const response = await client.db(dbName).collection("account").findOne({ email: receiver });
         if (response == null) {
             res.json("user doesn't exist");
             console.log("1");
         }
 
         else if (response.socketid == "offline") {
-            const response = await client.db(dbName).collection(receiver).insertOne({ sender: sender, message: message , name: name , messagetype : messagetype , messagefor : messagefor});
+            const response = await client.db(dbName).collection(receiver).insertOne({ sender: sender, message: message, name: name, messagetype: messagetype, messagefor: messagefor , type : "message"});
         }
 
         else {
@@ -60,9 +59,9 @@ async function sendmessage(receiver , message , sender , res , name , messagetyp
             const data = {
                 sender: sender,
                 message: message,
-                name : name,
-                messagetype : messagetype,
-                messagefor : messagefor
+                name: name,
+                messagetype: messagetype,
+                messagefor: messagefor
             }
             io.to(response.socketid).emit("message", data);
         }
@@ -70,7 +69,7 @@ async function sendmessage(receiver , message , sender , res , name , messagetyp
 
     catch (error) {
         res.json("error");
-        console.log("errorororo" , error)
+        console.log("errorororo", error)
     }
 
 }
@@ -108,7 +107,7 @@ app.post("/login/verifyopt", async (req, res) => {
 
         if (opt.otp == req.body.opt) {
             let response = await client.db(dbName).collection("OPTS").deleteOne({ email: req.body.email });
-            const accessToken = jwt.sign({ email: req.body.email}, secretKey);
+            const accessToken = jwt.sign({ email: req.body.email }, secretKey);
             res.json({ accessToken: accessToken });
         }
 
@@ -143,7 +142,7 @@ app.post(("/signup/verifyopt"), async (req, res) => {
         if (opt.otp == req.body.opt) {
             let response = await client.db(dbName).collection("OPTS").deleteOne({ email: req.body.email });
             const accessToken = jwt.sign({ email: req.body.email }, secretKey);
-            response = await client.db(dbName).collection("account").insertOne({ email: req.body.email, profilephoto : req.body.profilephoto , socketid: "offline" });
+            response = await client.db(dbName).collection("account").insertOne({ email: req.body.email, profilephoto: req.body.profilephoto, socketid: "offline" });
             res.json({ accessToken: accessToken });
         }
 
@@ -155,12 +154,12 @@ app.post(("/signup/verifyopt"), async (req, res) => {
     }
 });
 
-app.post(("/profilephoto") , authenticateToken , async (req , res)=>{
+app.post(("/profilephoto"), authenticateToken, async (req, res) => {
     console.log(req.body.email);
     try {
         let response = "";
-        req.body.messagefor != "group" ?  response = await client.db(dbName).collection("account").findOne({email : req.body.email}) :  response = await client.db(dbName).collection("group").findOne({name : req.body.email}); 
-        res.json({profilephoto : response.profilephoto});
+        req.body.messagefor != "group" ? response = await client.db(dbName).collection("account").findOne({ email: req.body.email }) : response = await client.db(dbName).collection("group").findOne({ name: req.body.email });
+        res.json({ profilephoto: response.profilephoto });
 
     } catch (error) {
         res.json("error");
@@ -180,21 +179,20 @@ app.post(('/setsocketid'), authenticateToken, async (req, res) => {
 
 app.post(("/message"), authenticateToken, async (req, res) => {
 
-    if(req.body.messagefor != "group")
-   { 
-    sendmessage(req.body.receiver , req.body.message , jwt.decode(req.token).email , res ,jwt.decode(req.token).email , req.body.messagetype , "individual");
-   }
+    if (req.body.messagefor != "group") {
+        sendmessage(req.body.receiver, req.body.message, jwt.decode(req.token).email, res, jwt.decode(req.token).email, req.body.messagetype, "individual");
+    }
 
     else {
-        const response =  await client.db(dbName).collection('group').findOne({name : req.body.receiver});
+        const response = await client.db(dbName).collection('group').findOne({ name: req.body.receiver });
 
         response.members.forEach(element => {
-            if(element.sender != jwt.decode(req.token).email  )
-            sendmessage(element.sender , req.body.message , response.name , res , jwt.decode(req.token).email , req.body.messagetype , "group");
+            if (element.sender != jwt.decode(req.token).email)
+                sendmessage(element.sender, req.body.message, response.name, res, jwt.decode(req.token).email, req.body.messagetype, "group");
         });
 
-        if(response.admin != jwt.decode(req.token).email)
-     sendmessage(response.admin , req.body.message , response.name , res , jwt.decode(req.token).email , req.body.messagetype , "group") 
+        if (response.admin != jwt.decode(req.token).email)
+            sendmessage(response.admin, req.body.message, response.name, res, jwt.decode(req.token).email, req.body.messagetype, "group")
     }
 
     res.json("send");
@@ -204,7 +202,7 @@ app.post(("/message"), authenticateToken, async (req, res) => {
 app.get("/getmessage", authenticateToken, async (req, res) => {
 
     try {
-        const response = await client.db(dbName).collection(jwt.decode(req.token).email).find({}).toArray();
+        const response = await client.db(dbName).collection(jwt.decode(req.token).email).find({ type : "message"}).toArray();
         await client.db(dbName).collection(jwt.decode(req.token).email).deleteMany({});
         res.json(response);
     } catch (error) {
@@ -215,10 +213,10 @@ app.get("/getmessage", authenticateToken, async (req, res) => {
 app.post(("/group"), authenticateToken, async (req, res) => {
     const group = {
         admin: jwt.decode(req.token).email,
-        name : req.body.name,
+        name: req.body.name,
         members: req.body.members,
         mode: "send",
-        profilephoto : req.body.profilephoto
+        profilephoto: req.body.profilephoto
     }
 
     try {
@@ -226,16 +224,26 @@ app.post(("/group"), authenticateToken, async (req, res) => {
 
         group.members.forEach(element => {
             console.log(element);
-            sendmessage(element.sender , `Hey come in my Group ${group.name}` , group.name , res , group.admin , "text" , "group")
+            sendmessage(element.sender, `Hey come in my Group ${group.name}`, group.name, res, group.admin, "text", "group")
             console.log("hello");
         });
-        sendmessage(group.admin , `You are group Admin of ${group.name}` , group.name , res , "Whatsapp" , "text" , "group");
+        sendmessage(group.admin, `You are group Admin of ${group.name}`, group.name, res, "Whatsapp", "text", "group");
         console.log("hello world");
         res.json("maked");
     } catch (error) {
         res.json(error);
     }
 });
+
+app.post(("/status"), authenticateToken, (req, res) => {
+
+    const status = {
+        type: "status",
+        message : req.body.message,
+
+    }
+
+})
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
