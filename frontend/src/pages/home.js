@@ -249,7 +249,7 @@ function Home() {
 
     return (
         <div className="App">
-            <div className='App1'>
+            {/* <div className='App1'>
                 {
                     !groupcompoactive ? <div className=''>
                         <input type="text" value={newsender} onChange={(e) => setNewsender(e.target.value)} />
@@ -271,8 +271,8 @@ function Home() {
 
             </div>
 
-            <div className='App2'> <Sendmessage /></div>
-            {/* <div className=''><Status /></div> */}
+            <div className='App2'> <Sendmessage /></div> */}
+            <div className=''><Status /></div>
         </div>
     );
 }

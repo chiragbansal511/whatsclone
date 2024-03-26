@@ -19,11 +19,13 @@
 .App1{
     width: 25vw;
     height: 100vh;
+    background-color: burlywood;
 }
 
 .App2{
     width: 75vw;
     height: 100vh;
+    background-color: bisque;
 }
 
 .status{

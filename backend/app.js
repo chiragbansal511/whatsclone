@@ -280,7 +280,7 @@ app.post(("/status"), authenticateToken, async (req, res) => {
 
     try {
         list.forEach(async (element) => {
-            sendstatus_comment(status, element);
+           element.messagefor != "group" ?  sendstatus_comment(status, element.sender) : 1 ;
         });
 
         res.json("send");
@@ -305,13 +305,13 @@ app.post(("/comment"), authenticateToken, async (req, res) => {
     try {
 
         resposne.list.forEach(element => {
-            sendstatus_comment(comment , element);
+            element.messagefor != "group" ? sendstatus_comment(comment , element.sender) : 1;
         });
 
         res.json("send");
 
     } catch (error) {
-        res.json("error");
+        res.json(error);
     }
 
 })
