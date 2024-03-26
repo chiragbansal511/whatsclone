@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { MongoClient } = require('mongodb');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
+const { send } = require("process");
 
 
 const PORT = 80;
@@ -42,6 +43,32 @@ function authenticateToken(req, res, next) {
     });
 }
 
+async function sendstatus_comment(comment_status , receiver) {
+    try {
+
+        const response = await client.db(dbName).collection("account").findOne({ email: receiver });
+
+        if (response == null) {
+            console.log("1");
+        }
+
+        else if (response.socketid == "offline") {
+            const response = await client.db(dbName).collection(receiver).insertOne(comment_status);
+        }
+
+        else {
+            io.to(response.socketid).emit("comment_status", comment_status);
+        }
+    }
+
+    catch (error) {
+        res.json("error");
+        console.log("errorororo", error)
+    }
+
+}
+
+
 async function sendmessage(receiver, message, sender, res, name, messagetype, messagefor) {
     try {
         const response = await client.db(dbName).collection("account").findOne({ email: receiver });
@@ -51,7 +78,7 @@ async function sendmessage(receiver, message, sender, res, name, messagetype, me
         }
 
         else if (response.socketid == "offline") {
-            const response = await client.db(dbName).collection(receiver).insertOne({ sender: sender, message: message, name: name, messagetype: messagetype, messagefor: messagefor , type : "message"});
+            const response = await client.db(dbName).collection(receiver).insertOne({ sender: sender, message: message, name: name, messagetype: messagetype, messagefor: messagefor, type: "message" });
         }
 
         else {
@@ -202,8 +229,8 @@ app.post(("/message"), authenticateToken, async (req, res) => {
 app.get("/getmessage", authenticateToken, async (req, res) => {
 
     try {
-        const response = await client.db(dbName).collection(jwt.decode(req.token).email).find({ type : "message"}).toArray();
-        await client.db(dbName).collection(jwt.decode(req.token).email).deleteMany({});
+        const response = await client.db(dbName).collection(jwt.decode(req.token).email).find({ type: "message" }).toArray();
+        await client.db(dbName).collection(jwt.decode(req.token).email).deleteMany({type : "message"});
         res.json(response);
     } catch (error) {
         res.json("error");
@@ -235,14 +262,78 @@ app.post(("/group"), authenticateToken, async (req, res) => {
     }
 });
 
-app.post(("/status"), authenticateToken, (req, res) => {
+app.post(("/status"), authenticateToken, async (req, res) => {
+
+    const now = new Date();
 
     const status = {
         type: "status",
-        message : req.body.message,
-
+        message: req.body.message,
+        time: now.setHours(),
+        sender: jwt.decode(req.token).email,
+        name: jwt.decode(req.token).email,
     }
 
+    const list = req.body.list;
+
+    await client.db(dbName).collection("status").insertOne({ email: status.sender, message: status.message, list: list });
+
+    try {
+        list.forEach(async (element) => {
+            sendstatus_comment(status, element);
+        });
+
+        res.json("send");
+
+    } catch (error) {
+        res.json("error");
+    }
+
+})
+
+app.post(("/comment"), authenticateToken, async (req, res) => {
+
+    const comment = {
+        type: "comment",
+        message: req.body.message,
+        sender: jwt.decode(req.token).email,
+        name: req.body.name
+    }
+
+    const resposne = await client.db(dbName).collection("status").findOne({email : comment.name});
+
+    try {
+
+        resposne.list.forEach(element => {
+            sendstatus_comment(comment , element);
+        });
+
+        res.json("send");
+
+    } catch (error) {
+        res.json("error");
+    }
+
+})
+
+app.get(("/getstatus") , authenticateToken , async (req , res)=>{
+    try {
+        const resposne = await client.db(dbName).collection(jwt.decode(req.token).email).find({type : "status"}).toArray();
+        await client.db(dbName).collection(jwt.decode(req.token).email).deleteMany({type : "status"});
+        res.json(resposne);
+    } catch (error) {
+        res.json("error");
+    }
+})
+
+app.get(("/getcomment") , authenticateToken , async (req , res)=>{
+    try {
+        const resposne = await client.db(dbName).collection(jwt.decode(req.token).email).find({type : "comment"}).toArray();
+        await client.db(dbName).collection(jwt.decode(req.token).email).deleteMany({type : "comment"});
+        res.json(resposne);
+    } catch (error) {
+        res.json("error");
+    }
 })
 
 server.listen(PORT, () => {
