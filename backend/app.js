@@ -108,7 +108,7 @@ app.post("/login/verifyopt", async (req, res) => {
 
         if (opt.otp == req.body.opt) {
             let response = await client.db(dbName).collection("OPTS").deleteOne({ email: req.body.email });
-            const accessToken = jwt.sign({ email: req.body.email }, secretKey);
+            const accessToken = jwt.sign({ email: req.body.email}, secretKey);
             res.json({ accessToken: accessToken });
         }
 
@@ -143,7 +143,7 @@ app.post(("/signup/verifyopt"), async (req, res) => {
         if (opt.otp == req.body.opt) {
             let response = await client.db(dbName).collection("OPTS").deleteOne({ email: req.body.email });
             const accessToken = jwt.sign({ email: req.body.email }, secretKey);
-            response = await client.db(dbName).collection("account").insertOne({ email: req.body.email, socketid: "offline" });
+            response = await client.db(dbName).collection("account").insertOne({ email: req.body.email, profilephoto : req.body.profilephoto , socketid: "offline" });
             res.json({ accessToken: accessToken });
         }
 
@@ -154,6 +154,18 @@ app.post(("/signup/verifyopt"), async (req, res) => {
         res.json("eror");
     }
 });
+
+app.post(("/profilephoto") , authenticateToken , async (req , res)=>{
+    console.log(req.body.email);
+    try {
+        let response = "";
+        req.body.messagefor != "group" ?  response = await client.db(dbName).collection("account").findOne({email : req.body.email}) :  response = await client.db(dbName).collection("group").findOne({name : req.body.email}); 
+        res.json({profilephoto : response.profilephoto});
+
+    } catch (error) {
+        res.json("error");
+    }
+})
 
 
 app.post(('/setsocketid'), authenticateToken, async (req, res) => {
@@ -205,7 +217,8 @@ app.post(("/group"), authenticateToken, async (req, res) => {
         admin: jwt.decode(req.token).email,
         name : req.body.name,
         members: req.body.members,
-        mode: "send"
+        mode: "send",
+        profilephoto : req.body.profilephoto
     }
 
     try {

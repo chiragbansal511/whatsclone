@@ -10,9 +10,9 @@ function Home() {
     const [socketid, setSocketid] = useState("");
     const [sender, setSender] = useState([]);
     const [newsender, setNewsender] = useState("");
-    const [groupcompoactive , setGroupcompoactive] = useState(false);
-    const [newgroup , setNewgroup] = useState("");
-    const [file , setFile] = useState();
+    const [groupcompoactive, setGroupcompoactive] = useState(false);
+    const [newgroup, setNewgroup] = useState("");
+    const [file, setFile] = useState();
 
     async function connectSocket() {
         if (!socketid) {
@@ -58,14 +58,14 @@ function Home() {
                 }
             });
 
-            response.data.forEach(element => {
+            response.data.forEach(async (element) => {
                 const message = {
                     type: "sender",
                     sender: element.sender,
                     message: element.message,
-                    name : element.name,
-                    messagetype : element.messagetype,
-                    messagefor : element.messagefor
+                    name: element.name,
+                    messagetype: element.messagetype,
+                    messagefor: element.messagefor
                 }
 
                 let prevmessage = localStorage.getItem(message.sender);
@@ -84,12 +84,41 @@ function Home() {
                     list = JSON.parse(list);
                     const res = list.find((e) => e.sender == message.sender);
                     if (res == null) {
-                        list.push({sender : message.sender , messagefor : message.messagefor});     
+
+                        const response = await axios.post('http://localhost:80/profilephoto',
+
+                            {
+                                email: message.sender,
+                                messagefor : message.messagefor
+                            },
+
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + Cookies.get("accessToken")
+                                }
+                            });
+
+
+                        list.push({ sender: message.sender, messagefor: message.messagefor, profilephoto: response.data.profilephoto });
                     }
                 }
 
                 else {
-                    list = [{sender : message.sender , messagefor : message.messagefor}];
+
+                    const response = await axios.post('http://localhost:80/profilephoto',
+
+                        {
+                            email: message.sender,
+                            messagefor : message.messagefor
+                        },
+
+                        {
+                            headers: {
+                                Authorization: "Bearer " + Cookies.get("accessToken")
+                            }
+                        });
+
+                    list = [{ sender: message.sender, messagefor: message.messagefor, profilephoto: response.data.profilephoto }];
                 }
 
                 localStorage.setItem("sender", JSON.stringify(list));
@@ -100,24 +129,51 @@ function Home() {
         }
     }
 
-    function handlesubmit() {
+    async function handlesubmit() {
         let list = localStorage.getItem("sender");
         if (list != null) {
+
+            const response = await axios.post('http://localhost:80/profilephoto',
+
+                {
+                    email: newsender,
+                    messagefor : "individual"
+                },
+
+                {
+                    headers: {
+                        Authorization: "Bearer " + Cookies.get("accessToken")
+                    }
+                });
+
             list = JSON.parse(list);
-            list.push({sender : newsender , messagetype : "individual"})
-            setSender(prevSender => [{sender : newsender , messagetype : "individual"}, ...prevSender]);
+            list.push({ sender: newsender, messagefor: "individual", profilephoto: response.data.profilephoto })
+            setSender(prevSender => [{ sender: newsender, messagefor: "individual", profilephoto: response.data.profilephoto }, ...prevSender]);
         }
 
         else {
-           list = [{sender : newsender , messagetype : "individual"}];
-           setSender([{sender : newsender , messagetype : "individual"}]);
+
+            const response = await axios.post('http://localhost:80/profilephoto',
+
+                {
+                    email: newsender,
+                    messagefor : "individual"
+                },
+
+                {
+                    headers: {
+                        Authorization: "Bearer " + Cookies.get("accessToken")
+                    }
+                });
+
+            list = [{ sender: newsender, messagefor: "individual", profilephoto: response.data.profilephoto }];
+            setSender([{ sender: newsender, messagefor: "individual", profilephoto: response.data.profilephoto }]);
         }
 
         localStorage.setItem("sender", JSON.stringify(list));
     }
 
-    function handlegroupcomactive()
-    {
+    function handlegroupcomactive() {
         setGroupcompoactive(!groupcompoactive);
     }
 
@@ -133,51 +189,61 @@ function Home() {
 
 
     useEffect(() => {
-        const handleMessage = (data) => {
+        const fetchDataAndHandleMessage = async (data) => {
             const message = {
                 type: "sender",
                 sender: data.sender,
                 message: data.message,
                 name: data.name,
-                messagetype : data.messagetype,
-                messagefor : data.messagefor
-            }
+                messagetype: data.messagetype,
+                messagefor: data.messagefor
+            };
 
             let prevmessage = localStorage.getItem(message.sender);
             if (prevmessage != undefined) {
                 prevmessage = JSON.parse(prevmessage);
                 prevmessage.push(message);
-            }
-
-            else {
+            } else {
                 prevmessage = [message];
             }
-
             localStorage.setItem(message.sender, JSON.stringify(prevmessage));
-            
-            let list = localStorage.getItem("sender");
-            if (list != null) {
-                list = JSON.parse(list);
-                const res = list.find((e) => e.sender == data.sender);
-                if (res == null) { 
-                    list.push({sender : message.sender , messagefor : message.messagefor});
-                    setSender(prevSender => [{sender : message.sender , messagefor : message.messagefor}, ...prevSender]);
-                }
-            }
 
-            else {
-                list = [{sender : message.sender , messagefor : message.messagefor}];
-                setSender([{sender : message.sender , messagefor : message.messagefor}]);
+            let list = JSON.parse(localStorage.getItem("sender")) || [];
+            const senderExists = list.find((e) => e.sender === data.sender);
+            if (!senderExists) {
+                try {
+
+                    const response = await axios.post('http://localhost:80/profilephoto',
+
+                        {
+                            email: message.sender,
+                            messagefor : message.messagefor
+                        },
+
+                        {
+                            headers: {
+                                Authorization: "Bearer " + Cookies.get("accessToken")
+                            }
+                        });
+
+                        console.log(response);
+
+                    list.push({ sender: message.sender, messagefor: message.messagefor, profilephoto : response.data.profilephoto });
+                    setSender(prevSender => [{ sender: message.sender, messagefor: message.messagefor, profilephoto : response.data.profilephoto }, ...prevSender]);
+                } catch (error) {
+                    console.error('Error fetching profile photo:', error);
+                }
             }
             localStorage.setItem("sender", JSON.stringify(list));
         };
 
-        socket.on("message", handleMessage);
+        socket.on("message", fetchDataAndHandleMessage);
 
         return () => {
-            socket.off("message", handleMessage);
+            socket.off("message", fetchDataAndHandleMessage);
         };
     }, []);
+
 
     useEffect(() => {
         getstoredofflinemessage();
@@ -185,24 +251,27 @@ function Home() {
 
     return (
         <div className="App">
-           <div className='App1'>
-           {
-                !groupcompoactive ? <div className=''>
-                <input type="text" value={newsender} onChange={(e) => setNewsender(e.target.value)} />
-                <button onClick={handlesubmit}>Add user</button>
-                <button onClick={handlegroupcomactive}>New group</button>
+            <div className='App1'>
                 {
-                    sender.map((senderName, index) => (
-                        <div key={index}>
-                            {senderName.sender != "" ? <button onClick={() => { Cookies.set("select", JSON.stringify(senderName)); window.location.reload() }}>{senderName.sender}</button>
-                                : <div></div>}
-                        </div>
-                    ))
+                    !groupcompoactive ? <div className=''>
+                        <input type="text" value={newsender} onChange={(e) => setNewsender(e.target.value)} />
+                        <button onClick={handlesubmit}>Add user</button>
+                        <button onClick={handlegroupcomactive}>New group</button>
+                        {
+                            sender.map((senderName, index) => (
+                                <div key={index}>
+                                    {senderName.sender != "" ? <div>
+                                        <img src={senderName.profilephoto} alt="profilephoto" />
+                                        <button onClick={() => { Cookies.set("select", JSON.stringify(senderName)); window.location.reload() }}>{senderName.sender}</button>
+                                    </div>
+                                        : <div></div>}
+                                </div>
+                            ))
+                        }
+                    </div> : <div><Addgroup handlegroupcomactive={handlegroupcomactive} /></div>
                 }
-            </div> : <div><Addgroup  handlegroupcomactive={handlegroupcomactive}/></div>
-            }
 
-           </div>
+            </div>
 
             <div className='App2'> <Sendmessage /></div>
         </div>

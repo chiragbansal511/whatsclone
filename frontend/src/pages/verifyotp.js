@@ -8,13 +8,16 @@ export default function Verifyopt() {
     const location = useLocation();
     const [otp, setOtp] = useState("");
     const dataReceived = location.state.data;
+    const profilephoto = location.state.profilephoto;
+
     console.log(dataReceived);
     async function handleSubmit(e) {
         e.preventDefault();
 
         const response = await axios.post(`http://localhost:80/${location.state.type}/verifyopt`, {
             email: dataReceived,
-            opt : otp
+            opt : otp,
+            profilephoto : profilephoto
         });
 
         console.log(response);
