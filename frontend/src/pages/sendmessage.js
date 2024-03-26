@@ -68,12 +68,12 @@ export default function Sendmessage() {
         });
     };
 
-    const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        const base64 = await convertToBase64(file);
-        setPostImage({ ...postImage, myFile: base64 });
-        console.log(postImage)
-    };
+    // const handleFileUpload = async (e) => {
+    //     const file = e.target.files[0];
+    //     const base64 = await convertToBase64(file);
+    //     setPostImage({ ...postImage, myFile: base64 });
+    //     console.log(postImage)
+    // };
 
 
     useEffect(() => {
