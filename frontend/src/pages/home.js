@@ -262,7 +262,7 @@ function Home() {
                                 <div key={index}>
                                     {senderName.sender != "" ? <div>
                                         <img src={senderName.profilephoto} alt="profilephoto" />
-                                        <button onClick={() => { Cookies.set("select", JSON.stringify(senderName)); window.location.reload() }}>{senderName.sender}</button>
+                                        <button onClick={() => { Cookies.set("select", JSON.stringify({sender : senderName.sender , messagefor : senderName.messagefor})); window.location.reload() }}>{senderName.sender}</button>
                                     </div>
                                         : <div></div>}
                                 </div>
