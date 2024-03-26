@@ -11,17 +11,16 @@ export default function Sendmessage() {
     const [message, setMessage] = useState([]);
     const [sendmessage, setSendmessage] = useState("");
     const [postImage, setPostImage] = useState();
-    const [messagetype, setMessagetype] = useState("");
+    const [uploadcompo , setUploadcompo] = useState(false);
 
     async function handlesubmit() {
         try {
 
-            setMessagetype("text");
             const response = await axios.post('http://localhost:80/message', {
 
                 message: sendmessage,
                 receiver: sender.sender,
-                messagetype: messagetype,
+                messagetype: "text",
                 messagefor: sender.messagefor
             }, {
                 headers: {
@@ -33,7 +32,7 @@ export default function Sendmessage() {
                 type: "receiver",
                 sender: sender.sender,
                 message: sendmessage,
-                messagetype: messagetype,
+                messagetype: "text",
                 messagefor: "individual"
             }
 
@@ -47,12 +46,56 @@ export default function Sendmessage() {
                 prevmessage = [message];
             }
             localStorage.setItem(message.sender, JSON.stringify(prevmessage));
-            setMessage(prevMessages => [...prevMessages, { message: sendmessage, type: "receiver", sender: "you" , messagetype : message.messagetype , messagefor : message.messagefor}]);
+            setMessage(prevMessages => [...prevMessages, { message: sendmessage, type: "receiver", sender: "you" , messagetype : "text" , messagefor : message.messagefor}]);
             setSendmessage("");
             console.log(response);
         } catch (error) {
 
         }
+    }
+
+    async function handleimagesend()
+    {   
+        try {
+
+            const response = await axios.post('http://localhost:80/message', {
+
+                message: postImage,
+                receiver: sender.sender,
+                messagetype: "image",
+                messagefor: sender.messagefor
+            }, {
+                headers: {
+                    Authorization: "Bearer " + Cookies.get("accessToken")
+                }
+            });
+
+            const message = {
+                type: "receiver",
+                sender: sender.sender,
+                message: postImage,
+                messagetype: "image",
+                messagefor: "individual"
+            }
+
+            let prevmessage = localStorage.getItem(message.sender);
+            if (prevmessage != undefined) {
+                prevmessage = JSON.parse(prevmessage);
+                prevmessage.push(message);
+            }
+
+            else {
+                prevmessage = [message];
+            }
+            localStorage.setItem(message.sender, JSON.stringify(prevmessage));
+            setMessage(prevMessages => [...prevMessages, { message: postImage, type: "receiver", sender: "you" , messagetype : "image" , messagefor : message.messagefor}]);
+            setPostImage("");
+           
+        } catch (error) {
+            
+        }
+
+        setUploadcompo(false);
     }
 
     const convertToBase64 = (file) => {
@@ -68,12 +111,14 @@ export default function Sendmessage() {
         });
     };
 
-    // const handleFileUpload = async (e) => {
-    //     const file = e.target.files[0];
-    //     const base64 = await convertToBase64(file);
-    //     setPostImage({ ...postImage, myFile: base64 });
-    //     console.log(postImage)
-    // };
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        const base64 = await convertToBase64(file);
+        setPostImage({myFile: base64 });
+        console.log(postImage , "postimage");
+        console.log(base64);
+        setUploadcompo(true);
+    };
 
 
     useEffect(() => {
@@ -116,14 +161,26 @@ export default function Sendmessage() {
                 message != [] ? message.map((e, index) => (
                     <div key={index} className={e.type}>
                         {e.messagefor == "group" && e.type == "sender" ? <div>{e.name}</div> : <div></div>}
-                        <div>{e.message}</div>
+                        {
+                            e.messagetype == "text" ? <div>{e.message}</div> : <img src={e.message.myFile} alt="image" height="100vh" width="100vh" />
+                        }
                     </div>
                 )) : <div></div>
             }
 
             <div>send message</div>
             <input type="text" value={sendmessage} onChange={(e) => setSendmessage(e.target.value)} />
-            {/* <input type="file" name="image" id='file' accept='.jpeg , .png , .jpg' onChange={(e) => { handleFileUpload(e) }} /> */}
+            
+            {
+                uploadcompo ? <div>
+                    <img src={postImage.myFile} alt="image" height="100vh" width="100vh" />
+                    <button onClick={handleimagesend}>Send</button>
+                </div>
+                :
+                <div></div>
+            }
+
+            <input type="file" name="image" id='file' accept='.jpeg , .png , .jpg' onChange={(e) => { handleFileUpload(e) }} />
             <button onClick={handlesubmit}>send</button>
         </div>
     )
