@@ -7,10 +7,26 @@ export default function Status() {
 
     const [statuslist, setStatuslist] = useState([""]);
     const [select, setSelect] = useState("");
-    const [status , setStatus] = useState("");
-    const [comment , setComment] = useState([""]);
-    const [postImage , setPostImage] = useState("");
-    const [newcomment , setNewcomment] = useState("");
+    const [status, setStatus] = useState("");
+    const [comment, setComment] = useState([""]);
+    const [postImage, setPostImage] = useState("");
+    const [newcomment, setNewcomment] = useState("");
+
+    async function removestatus(sender) {
+        console.log("remove")
+        setTimeout(() => {
+
+            let prevStatuslist = localStorage.getItem("status");
+            prevStatuslist = JSON.parse(prevStatuslist);
+            const newPrevStatuslist = prevStatuslist.filter(item => {
+                return item.sender !== sender.name || item.status.myFile !== sender.message.myFile;
+            });
+            localStorage.setItem("status", JSON.stringify(newPrevStatuslist));
+            setStatuslist(newPrevStatuslist);
+            console.log(newPrevStatuslist);
+            localStorage.removeItem(`status,${sender.name}`);
+        }, 10*60*1000);
+    }
 
     async function getstoredofflinestatus() {
         try {
@@ -46,6 +62,8 @@ export default function Status() {
                 }
 
                 localStorage.setItem("status", JSON.stringify(list));
+
+                removestatus(status);
             });
 
         } catch (error) {
@@ -88,24 +106,23 @@ export default function Status() {
         }
     }
 
-    async function sendcomment()
-    {
-        console.log(newcomment , select);
+    async function sendcomment() {
+        console.log(newcomment, select);
 
         try {
-            
+
             const response = await axios.post('http://localhost:80/comment',
 
-            {
-                message : newcomment,
-                name : select
-            },
+                {
+                    message: newcomment,
+                    name: select
+                },
 
-            {
-                headers: {
-                    Authorization: "Bearer " + Cookies.get("accessToken")
-                }
-            });
+                {
+                    headers: {
+                        Authorization: "Bearer " + Cookies.get("accessToken")
+                    }
+                });
 
             console.log(response);
             const comment = {
@@ -119,7 +136,7 @@ export default function Status() {
             if (prevstatus != undefined) {
                 prevstatus = JSON.parse(prevstatus);
                 prevstatus.push(comment);
-                setComment(e=>[...e ,comment]);
+                setComment(e => [...e, comment]);
             }
 
             else {
@@ -129,25 +146,24 @@ export default function Status() {
             localStorage.setItem(`status,${comment.name}`, JSON.stringify(prevstatus));
 
         } catch (error) {
-            
+
         }
     }
 
-    async function handlestatus()
-    {
+    async function handlestatus() {
         try {
             const response = await axios.post('http://localhost:80/status',
 
-            {
-                message : postImage,
-                list : JSON.parse(localStorage.getItem("sender"))
-            },
+                {
+                    message: postImage,
+                    list: JSON.parse(localStorage.getItem("sender"))
+                },
 
-            {
-                headers: {
-                    Authorization: "Bearer " + Cookies.get("accessToken")
-                }
-            });
+                {
+                    headers: {
+                        Authorization: "Bearer " + Cookies.get("accessToken")
+                    }
+                });
 
             console.log(response)
             const status = {
@@ -156,27 +172,28 @@ export default function Status() {
                 name: "your",
             }
 
+            removestatus(status);
+
             let list = localStorage.getItem("status");
-            if(list != undefined )
-           {
-            try {
-                list = JSON.parse(list);
-                list.push({ sender: status.name, status: status.message });
-                setStatuslist(e=>[{ sender: status.name, status: status.message } , ...e]);
-            } catch (error) {
-                console.error('Error fetching profile photo:', error);
+            if (list != undefined) {
+                try {
+                    list = JSON.parse(list);
+                    list.push({ sender: status.name, status: status.message });
+                    setStatuslist(e => [{ sender: status.name, status: status.message }, ...e]);
+                } catch (error) {
+                    console.error('Error fetching profile photo:', error);
+                }
             }
-        }
 
-        else {
-            console.log("hello");
-            list = [{ sender: status.name, status: status.message }];
-            setStatuslist([{ sender: status.name, status: status.message }])
-       }
+            else {
+                console.log("hello");
+                list = [{ sender: status.name, status: status.message }];
+                setStatuslist([{ sender: status.name, status: status.message }])
+            }
 
-        localStorage.setItem("status", JSON.stringify(list));
+            localStorage.setItem("status", JSON.stringify(list));
         } catch (error) {
-            
+
         }
     }
 
@@ -196,21 +213,21 @@ export default function Status() {
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         const base64 = await convertToBase64(file);
-        setPostImage({myFile: base64 });
-        console.log(postImage , "postimage");
+        setPostImage({ myFile: base64 });
+        console.log(postImage, "postimage");
         console.log(base64);
 
     };
 
 
     useEffect(() => {
-      
-       let comment = localStorage.getItem(`status,${select}`);
-       console.log(comment);
+
+        let comment = localStorage.getItem(`status,${select}`);
+        console.log(comment);
         setComment(JSON.parse(comment));
 
     }, [select])
-    
+
     useEffect(() => {
 
         const fetchDataAndHandleMessage = async (data) => {
@@ -224,24 +241,23 @@ export default function Status() {
                     sender: data.sender,
                     name: data.name,
                 }
-
+                removestatus(status);
                 let list = localStorage.getItem("status");
-                if(list != undefined )
-               {
-                try {
-                    list = JSON.parse(list);
-                    list.push({ sender: status.name, status: status.message });
-                    setStatuslist(e=>[{ sender: status.name, status: status.message } , ...e]);
-                } catch (error) {
-                    console.error('Error fetching profile photo:', error);
+                if (list != undefined) {
+                    try {
+                        list = JSON.parse(list);
+                        list.push({ sender: status.name, status: status.message });
+                        setStatuslist(e => [{ sender: status.name, status: status.message }, ...e]);
+                    } catch (error) {
+                        console.error('Error fetching profile photo:', error);
+                    }
                 }
-               }
 
-               else {
+                else {
                     console.log("hello");
                     list = [{ sender: status.name, status: status.message }];
                     setStatuslist([{ sender: status.name, status: status.message }])
-               }
+                }
 
                 localStorage.setItem("status", JSON.stringify(list));
             }
@@ -254,30 +270,27 @@ export default function Status() {
                     name: data.name
                 }
 
-                
+
                 let prevmessage = localStorage.getItem(`status,${comment.name}`)
                 if (prevmessage != undefined) {
                     prevmessage = JSON.parse(prevmessage);
                     prevmessage.push(comment);
-                    if(comment.name === select)
-                {
-                    setComment(e=>[...e , comment]);
-                }
+                    if (comment.name === select) {
+                        setComment(e => [...e, comment]);
+                    }
                 } else {
                     prevmessage = [comment];
-                    if(comment.name === select)
-                {
-                    setComment([comment]);
-                }
+                    if (comment.name === select) {
+                        setComment([comment]);
+                    }
                 }
                 localStorage.setItem(`status,${comment.name}`, JSON.stringify(prevmessage));
 
             }
-            
-             if(comment.name === select)
-             {
-                setComment(e=>[comment , ...e]);
-             }
+
+            if (comment.name === select) {
+                setComment(e => [comment, ...e]);
+            }
 
             console.log(statuslist);
         };
@@ -295,25 +308,25 @@ export default function Status() {
     }, [])
 
     useEffect(() => {
-     
+
         let list = localStorage.getItem('status');
         setStatuslist(JSON.parse(list));
     }, [])
-    
+
     return (
         <div className='App'>
 
             <div className='App1'>
-            <button onClick={handlestatus}>Add status</button>
-            <input type="file" name="" id="" accept='.jpeg , .png , .jpg' onChange={handleFileUpload}/>
+                <button onClick={handlestatus}>Add status</button>
+                <input type="file" name="" id="" accept='.jpeg , .png , .jpg' onChange={handleFileUpload} />
                 {
-                   statuslist != null  ?  statuslist.map((element , index)=>(
-                    <div key={index}>
-                      {
-                        element != "" ?  <button onClick={()=>{setSelect(element.sender); setStatus(element.status)}}>{element.sender}</button> : <div></div>
-                      }
-                    </div>
-                )) : <div></div>
+                    statuslist != null ? statuslist.map((element, index) => (
+                        <div key={index}>
+                            {
+                                element != "" ? <button onClick={() => { setSelect(element.sender); setStatus(element.status) }}>{element.sender}</button> : <div></div>
+                            }
+                        </div>
+                    )) : <div></div>
                 }
             </div>
 
@@ -322,16 +335,16 @@ export default function Status() {
 
                 comments
 
-                {   
-                    comment != null ? comment.map((e , index)=>(
+                {
+                    comment != null ? comment.map((e, index) => (
                         <div key={index}>
-                           <div> {e.sender}</div>
-                           <div> {e.message}</div>
+                            <div> {e.sender}</div>
+                            <div> {e.message}</div>
                         </div>
                     )) : <div>no comment</div>
                 }
 
-                <input type="text"  value={newcomment} onChange={(e)=>setNewcomment(e.target.value)}/>
+                <input type="text" value={newcomment} onChange={(e) => setNewcomment(e.target.value)} />
                 <button onClick={sendcomment}>Send</button>
             </div>
         </div>
