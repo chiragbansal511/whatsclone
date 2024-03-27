@@ -305,8 +305,12 @@ app.post(("/comment"), authenticateToken, async (req, res) => {
     try {
 
         resposne.list.forEach(element => {
+            if(element.sender != comment.sender)
             element.messagefor != "group" ? sendstatus_comment(comment , element.sender) : 1;
         });
+
+        if(comment.name != comment.sender)
+        sendstatus_comment(comment , comment.name);
 
         res.json("send");
 
