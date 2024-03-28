@@ -169,7 +169,7 @@ export default function Status() {
             const status = {
                 type: "status",
                 message: postImage,
-                name: "your",
+                name: Cookies.get("your"),
             }
 
             removestatus(status);
@@ -314,9 +314,9 @@ export default function Status() {
     }, [])
 
     return (
-        <div className='App'>
+        <div className='App1'>
 
-            <div className='App1'>
+            <div className='col2'>
                 <button onClick={handlestatus}>Add status</button>
                 <input type="file" name="" id="" accept='.jpeg , .png , .jpg' onChange={handleFileUpload} />
                 {
@@ -330,7 +330,8 @@ export default function Status() {
                 }
             </div>
 
-            <div className='App2'>
+            <div className='col3'>
+
                 <img src={status.myFile} alt="status" />
 
                 comments

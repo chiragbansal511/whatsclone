@@ -11,6 +11,7 @@ function Home() {
     const [sender, setSender] = useState([]);
     const [newsender, setNewsender] = useState("");
     const [groupcompoactive, setGroupcompoactive] = useState(false);
+    const [select, setSelect] = useState(["send", "hidden", "send", "hidden"]);
 
     async function connectSocket() {
         if (!socketid) {
@@ -87,7 +88,7 @@ function Home() {
 
                             {
                                 email: message.sender,
-                                messagefor : message.messagefor
+                                messagefor: message.messagefor
                             },
 
                             {
@@ -107,7 +108,7 @@ function Home() {
 
                         {
                             email: message.sender,
-                            messagefor : message.messagefor
+                            messagefor: message.messagefor
                         },
 
                         {
@@ -135,7 +136,7 @@ function Home() {
 
                 {
                     email: newsender,
-                    messagefor : "individual"
+                    messagefor: "individual"
                 },
 
                 {
@@ -155,7 +156,7 @@ function Home() {
 
                 {
                     email: newsender,
-                    messagefor : "individual"
+                    messagefor: "individual"
                 },
 
                 {
@@ -215,7 +216,7 @@ function Home() {
 
                         {
                             email: message.sender,
-                            messagefor : message.messagefor
+                            messagefor: message.messagefor
                         },
 
                         {
@@ -224,10 +225,10 @@ function Home() {
                             }
                         });
 
-                        console.log(response);
+                    console.log(response);
 
-                    list.push({ sender: message.sender, messagefor: message.messagefor, profilephoto : response.data.profilephoto });
-                    setSender(prevSender => [{ sender: message.sender, messagefor: message.messagefor, profilephoto : response.data.profilephoto }, ...prevSender]);
+                    list.push({ sender: message.sender, messagefor: message.messagefor, profilephoto: response.data.profilephoto });
+                    setSender(prevSender => [{ sender: message.sender, messagefor: message.messagefor, profilephoto: response.data.profilephoto }, ...prevSender]);
                 } catch (error) {
                     console.error('Error fetching profile photo:', error);
                 }
@@ -249,30 +250,44 @@ function Home() {
 
     return (
         <div className="App">
-            <div className='App1'>
-                {
-                    !groupcompoactive ? <div className=''>
-                        <input type="text" value={newsender} onChange={(e) => setNewsender(e.target.value)} />
-                        <button onClick={handlesubmit}>Add user</button>
-                        <button onClick={handlegroupcomactive}>New group</button>
+
+            <div className='col1'>
+
+                <div onClick={() => setSelect(["send", "hidden", "send", "hidden"])} className='but1'></div>
+                <div onClick={() => setSelect(["hidden", "send", "send", "hidden"])} className='but2'></div>
+                <div onClick={() => setSelect(["hidden", "hidden", 'hidden', "send"])} className='but3'></div>
+            </div>
+
+            <div className={select[2]}>
+        <div className='col2'>
+        <div className={select[0]}>
+                    <div className='App2'>
+                       <div className='add'>
+                       <input type="text" className='addsender' value={newsender} onChange={(e) => setNewsender(e.target.value)} />
+                        <button onClick={handlesubmit} className='addsenderbut'>Add user</button>
+                       </div>
                         {
                             sender.map((senderName, index) => (
                                 <div key={index}>
-                                    {senderName.sender != "" ? <div>
-                                        <img src={senderName.profilephoto} alt="profilephoto" />
-                                        <button onClick={() => { Cookies.set("select", JSON.stringify({sender : senderName.sender , messagefor : senderName.messagefor})); window.location.reload() }}>{senderName.sender}</button>
+                                    {senderName.sender != "" ? <div className='col2list'>
+                                        <img src={senderName.profilephoto} alt="profilephoto" className='profilephoto' />
+                                        <div className='listbut' onClick={() => { Cookies.set("select", JSON.stringify({ sender: senderName.sender, messagefor: senderName.messagefor })); window.location.reload() }}>{senderName.sender}</div>
                                     </div>
                                         : <div></div>}
                                 </div>
                             ))
                         }
-                    </div> : <div><Addgroup handlegroupcomactive={handlegroupcomactive} /></div>
-                }
+                    </div>
+                </div>
+
+                {
+                    groupcompoactive ? <div className={select[1]}><div className='App2'><Addgroup handlegroupcomactive={handlegroupcomactive} /></div></div> : <button className={select[1]} onClick={handlegroupcomactive}>New group</button>}
+        </div>
 
             </div>
 
-            <div className='App2'> <Sendmessage /></div>
-            <div className=''><Status /></div>
+            <div className={select[2]}> <div><Sendmessage /></div></div>
+            <div className={select[3]}><div><Status /></div></div>
         </div>
     );
 }

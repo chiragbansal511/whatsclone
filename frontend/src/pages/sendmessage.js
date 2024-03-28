@@ -168,7 +168,6 @@ export default function Sendmessage() {
                 )) : <div></div>
             }
 
-            <div>send message</div>
             <input type="text" value={sendmessage} onChange={(e) => setSendmessage(e.target.value)} />
             
             {

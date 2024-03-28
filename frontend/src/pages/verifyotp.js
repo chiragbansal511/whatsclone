@@ -22,6 +22,7 @@ export default function Verifyopt() {
 
         console.log(response);
         Cookies.set("accessToken", response.data.accessToken);
+        Cookies.set("your" , dataReceived);
         navigate("/home");
         window.location.reload();
     };

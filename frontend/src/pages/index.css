@@ -1,33 +1,139 @@
+.App {
+    height: 100vh;
+    width: 100vw;
+    background-color: rgb(40, 41, 41);
+    display: flex;
+    flex-direction: row;
+}
+
+.App1 {
+    height: 100vh;
+    width: 95vw;
+    background-color: rgb(3, 3, 3);
+    display: flex;
+    flex-direction: row;
+}
+
+.col1 {
+    height: 100vh;
+    width: 5vw;
+    background-color: rgb(40, 41, 41);
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+}
+
+.col2 {
+    height: 100vh;
+    width: 20vw;
+    background-color: rgb(29, 28, 28);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.send {
+    display: inline-block;
+}
+
+.profilephoto {
+    height: 5vh;
+    width: 5vh;
+    border-radius: 100%;
+    background-color: black;
+}
+
+.but1 {
+    height: 5vh;
+    width: 5vh;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M3 20v-6l8-2l-8-2V4l19 8Z'/%3E%3C/svg%3E");
+    background-color: rgb(40, 41, 41);
+    background-repeat: no-repeat;
+    margin-top: 10px;
+}
+
+.but2 {
+    height: 5vh;
+    width: 5vh;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M12 5a3.5 3.5 0 0 0-3.5 3.5A3.5 3.5 0 0 0 12 12a3.5 3.5 0 0 0 3.5-3.5A3.5 3.5 0 0 0 12 5m0 2a1.5 1.5 0 0 1 1.5 1.5A1.5 1.5 0 0 1 12 10a1.5 1.5 0 0 1-1.5-1.5A1.5 1.5 0 0 1 12 7M5.5 8A2.5 2.5 0 0 0 3 10.5c0 .94.53 1.75 1.29 2.18c.36.2.77.32 1.21.32c.44 0 .85-.12 1.21-.32c.37-.21.68-.51.91-.87A5.42 5.42 0 0 1 6.5 8.5v-.28c-.3-.14-.64-.22-1-.22m13 0c-.36 0-.7.08-1 .22v.28c0 1.2-.39 2.36-1.12 3.31c.12.19.25.34.4.49a2.482 2.482 0 0 0 1.72.7c.44 0 .85-.12 1.21-.32c.76-.43 1.29-1.24 1.29-2.18A2.5 2.5 0 0 0 18.5 8M12 14c-2.34 0-7 1.17-7 3.5V19h14v-1.5c0-2.33-4.66-3.5-7-3.5m-7.29.55C2.78 14.78 0 15.76 0 17.5V19h3v-1.93c0-1.01.69-1.85 1.71-2.52m14.58 0c1.02.67 1.71 1.51 1.71 2.52V19h3v-1.5c0-1.74-2.78-2.72-4.71-2.95M12 16c1.53 0 3.24.5 4.23 1H7.77c.99-.5 2.7-1 4.23-1'/%3E%3C/svg%3E");
+    background-color: rgb(40, 41, 41);
+    background-repeat: no-repeat;
+    margin-top: 10px;
+}
+
+.but3 {
+    height: 5vh;
+    width: 5vh;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M18.36 2.64c1.64 0 3 1.36 3 3c0 1.65-1.36 3-3 3c-1.65 0-3-1.35-3-3c0-.3.05-.58.14-.84c-1.07-.51-2.25-.8-3.5-.8a8 8 0 0 0-8 8l.04.84l-1.99.21L2 12A10 10 0 0 1 12 2c1.69 0 3.28.42 4.67 1.16c.49-.33 1.07-.52 1.69-.52m0 2a1 1 0 0 0-1 1a1 1 0 0 0 1 1c.56 0 1-.45 1-1c0-.56-.44-1-1-1M5.64 15.36c1.65 0 3 1.35 3 3c0 .3-.05.58-.14.84c1.07.51 2.25.8 3.5.8a8 8 0 0 0 8-8l-.04-.84l1.99-.21L22 12a10 10 0 0 1-10 10c-1.69 0-3.28-.42-4.67-1.16c-.49.33-1.07.52-1.69.52c-1.64 0-3-1.36-3-3c0-1.65 1.36-3 3-3m0 2c-.56 0-1 .45-1 1c0 .56.44 1 1 1a1 1 0 0 0 1-1a1 1 0 0 0-1-1M12 8a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4'/%3E%3C/svg%3E");
+    background-color: rgb(40, 41, 41);
+    background-repeat: no-repeat;
+    margin-top: 10px;
+}
+
+.but1:active,
+.but2:active,
+.but3:active {
+    background-color: rgb(9, 9, 9);
+}
+
+.but1:hover , .but2:hover , .but3:hover{
+    cursor: pointer;
+    background-color: rgb(30, 29, 29);
+}
+
+.add {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.addsender {
+    width: 11vw;
+    height: 3.5vh;
+    background-color: white;
+}
+
+.addsenderbut {
+    width: 5vw;
+    height: 4vh;
+}
+
+.col2list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    width: 17vw;
+    justify-content: space-between;
+}
+
+.listbut{
+    width: 14vw;
+    background-color: rgb(29, 28, 28);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1%;
+}
+
+.listbut:hover{
+    cursor: pointer;
+    background-color: rgb(22, 22, 22);
+}
+
 .container{
     display: flex;
     flex-direction: column;
-    background-color: aqua;
-    height: 100vh;
+    width: 75vw;
     padding: 10px;
 }
 
 .receiver{
     align-self: flex-end;
-}
-
-.App{
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-}
-
-.App1{
-    width: 25vw;
-    height: 100vh;
-    background-color: burlywood;
-}
-
-.App2{
-    width: 75vw;
-    height: 100vh;
-    background-color: bisque;
-}
-
-.status{
-    display: none;
 }
