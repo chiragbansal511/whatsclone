@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 export default function Login()
 {
   const navigate = useNavigate();
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState('Email');
   
     async function handleSubmit(e){
       e.preventDefault();
@@ -26,19 +26,18 @@ export default function Login()
     };
 
     return(
-        <div className="">
-        <h2 className=" text-red-800">Login</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="username">Email:</label>
+        <div className="login" style={{backgroundColor : 'black' , height : '100vh' , width : '100vw'}}>
+        <div style={{fontSize : 75 , fontWeight : 'bold'}}>Login !</div>
+        <form onSubmit={handleSubmit} style={{display : "flex" , flexDirection : 'column' , justifyContent : 'center' , alignItems : 'center'}}>
+            
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              style={{width : 300 , height : 30 , borderRadius : 5 , marginTop : 25}}
             />
-          </div>
-          <button type="submit">login</button>
+          <div onClick={handleSubmit} className="loginbut" style={{height : 50 , width : 50  }}>Login</div>
         </form>
       </div>
     );

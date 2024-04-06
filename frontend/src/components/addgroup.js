@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import Cookies from "js-cookie";
+import { useRef } from "react";
 
 export default function Addgroup(props) {
     const [list, setList] = useState([""]);
@@ -8,6 +9,7 @@ export default function Addgroup(props) {
     const [groupdataname, setGroupdataname] = useState("name");
     const [datacompo, setDatacompo] = useState(false);
     const [postImage , setPostImage] = useState("");
+    const profilephotoref = useRef(null);
 
     useEffect(() => {
         let list = localStorage.getItem("sender");
@@ -72,10 +74,10 @@ export default function Addgroup(props) {
                 : <div></div>}
                     </div>
                 )) : <div style={{display : "flex" , flexDirection : 'column' , justifyContent : 'center' , alignItems : 'center'}}>
-                    <img src={postImage.myFile} style={{marginTop : 30 , height : "10vh" , width : "10vh" , backgroundColor : 'white' , borderRadius : 100}}/>
+                    <img src={postImage.myFile} style={{marginTop : 30 , height : "10vh" , width : "10vh" , backgroundColor : 'white' , borderRadius : 100}} onClick={()=>{profilephotoref.current.click()}} />
                     <div style={{color : 'white' , fontSize : 15 , marginTop : 5    }}>Profile Photo</div>
-                    <input style={{marginTop : 10}} type="text" value={groupdataname} onChange={(e) => setGroupdataname(e.target.value)} />
-                    <input type="file" accept=".jpeg , .png , .jpg" onChange={handleFileUpload} />
+                    <input style={{marginTop : 10 , borderRadius : 5}} type="text" value={groupdataname} onChange={(e) => setGroupdataname(e.target.value)} />
+                    <input type="file" accept=".jpeg , .png , .jpg" onChange={handleFileUpload} ref={profilephotoref} style={{display : "none"}} />
                 </div>
             }
             <div style={{marginTop : 10 }} id="creategroupbut" onClick={handleclick}></div>

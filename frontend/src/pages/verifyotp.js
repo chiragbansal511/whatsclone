@@ -29,19 +29,20 @@ export default function Verifyopt() {
 
 
     return (
-        <div className="">
-            <h2 className=" text-red-800">Verify OTP</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="username">Enter OTP:</label>
+        <div className="login" style={{height : "100vh" , width : '100vw'}}>
+            <h2 className="" style={{fontSize : 75 , fontWeight : 'bold'}}>Verify OTP</h2>
+            <form onSubmit={handleSubmit} style={{display : 'flex' , flexDirection : 'column' , justifyContent : 'center' , alignItems : 'center'}}>
+                <div style={{display : 'flex' , flexDirection : 'column'}}>
+                    <label htmlFor="username" style={{fontSize : 20 , fontWeight : 'bold'}}>Enter OTP:</label>
                     <input
                         type="number"
                         id="otp"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
+                        style={{width : 300 , height : 30 , borderRadius : 5 , marginTop : 15}}
                     />
                 </div>
-                <button type="submit">login</button>
+                <div style={{height : 50 , width : 50  }} onClick={handleSubmit} type="submit" className='verifyotp'>login</div>
             </form>
         </div>
     );

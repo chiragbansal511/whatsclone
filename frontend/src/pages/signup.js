@@ -2,9 +2,12 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 
 export default function Signup()
 {   
+  const profilephotoref = useRef(null);
+
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [postImage , setPostImage] = useState("");
@@ -43,23 +46,25 @@ const handleFileUpload = async (e) => {
 
 
   return(
-      <div className="">
-        <img src={postImage.myFile} alt="Profilephoto" height="100" width="100" />
-      <h2 className=" text-red-800">Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Email:</label>
+      <div  className="login" style={{backgroundColor : 'black' , height : '100vh' , width : '100vw'}}>
+        <img src={postImage.myFile} height="100" width="100" style={{backgroundColor : '#131313' , borderRadius : 5}} onClick={()=>{profilephotoref.current.click()}} />
+      <div style={{fontSize : 20 , marginTop : 15}}>Profile Photo</div>
+      <div style={{fontSize : 75 , fontWeight : 'bold'}}>Signup !</div>
+      <form onSubmit={handleSubmit} style={{display : 'flex' , flexDirection : 'column' , justifyContent : 'center' , alignItems : 'center'}}>
+        <div style={{display : 'flex' , flexDirection : 'column'}}>
+          <label htmlFor="username" style={{fontSize : 20 , fontWeight : 'bold' , marginTop : 15}}>Email:</label>
           <input
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            style={{width : 300 , height : 30 , borderRadius : 5 , marginTop : 10}}
+
           />
 
-          <label>Profile Photo</label>
-          <input type="file" accept=".jpeg , .png , .jpg" onChange={handleFileUpload}/>
+          <input type="file" accept=".jpeg , .png , .jpg" onChange={handleFileUpload} style={{display : "none"}} ref={profilephotoref}/>
         </div>
-        <button type="submit">login</button>
+        <div onClick={handleSubmit} style={{height : 50 , width : 50  }}  type="submit" className="signupbut">Signup</div>
       </form>
     </div>
   );

@@ -38,7 +38,7 @@ export default function PrivateRoute() {
                     </Routes>
                 </BrowserRouter>
             ) : (
-                <button><a href="/login">Login Now</a></button>
+                <div></div>
             )
     );
 }
