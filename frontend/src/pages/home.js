@@ -281,12 +281,18 @@ function Home() {
                 </div>
 
                 {
-                    groupcompoactive ? <div className={select[1]}><div className='App2'><Addgroup handlegroupcomactive={handlegroupcomactive} /></div></div> : <button className={select[1]} onClick={handlegroupcomactive}>New group</button>}
+                    groupcompoactive ? <div className={select[1]}><div className='App2' style={{ height : "90vh"}}><Addgroup handlegroupcomactive={handlegroupcomactive} /></div></div> : <div className={select[1]} onClick={handlegroupcomactive} id='addgroupbut'
+                    style={{
+                        height : 50,
+                        width : 50,
+                        backgroundColor : 'rgb(29, 28, 28)',
+                    }}
+                    ></div>}
         </div>
 
             </div>
 
-            <div className={select[2]}> <div><Sendmessage /></div></div>
+            <div className={select[2]}  style={{overflow : "scroll" , }}> <div><Sendmessage /></div></div>
             <div className={select[3]}><div><Status /></div></div>
         </div>
     );

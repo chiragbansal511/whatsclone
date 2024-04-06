@@ -68,16 +68,17 @@ export default function Addgroup(props) {
                 !datacompo ? list.map((e, index) => (
                     <div key={index}>
                  { e.messagefor != "group" ?
-                    <div onClick={() => setMembers(prevMembers => [{sender : e.sender , messagetype : "group"}, ...prevMembers])}>{e.sender}</div>
+                    <div style={{marginTop : 10}} id="grouplist" onClick={() => setMembers(prevMembers => [{sender : e.sender , messagetype : "group"}, ...prevMembers])}>{e.sender}</div>
                 : <div></div>}
                     </div>
-                )) : <div>
-                    <img src={postImage.myFile} alt="photo" />
-                    <input type="text" value={groupdataname} onChange={(e) => setGroupdataname(e.target.value)} />
+                )) : <div style={{display : "flex" , flexDirection : 'column' , justifyContent : 'center' , alignItems : 'center'}}>
+                    <img src={postImage.myFile} style={{marginTop : 30 , height : "10vh" , width : "10vh" , backgroundColor : 'white' , borderRadius : 100}}/>
+                    <div style={{color : 'white' , fontSize : 15 , marginTop : 5    }}>Profile Photo</div>
+                    <input style={{marginTop : 10}} type="text" value={groupdataname} onChange={(e) => setGroupdataname(e.target.value)} />
                     <input type="file" accept=".jpeg , .png , .jpg" onChange={handleFileUpload} />
                 </div>
             }
-            <button onClick={handleclick}>Add</button>
+            <div style={{marginTop : 10 }} id="creategroupbut" onClick={handleclick}></div>
         </div>
     )
 }
