@@ -66,6 +66,8 @@ const handleFileUpload = async (e) => {
         </div>
         <div onClick={handleSubmit} style={{height : 50 , width : 50  }}  type="submit" className="signupbut">Signup</div>
       </form>
+
+      <div style={{display : "flex" , marginTop : '20'}}>Already have account <div style={{marginLeft : 5, color : 'rgb(35,168,201)'}} onClick={()=>{navigate('/login')}} className="clickhere">Click here</div></div>
     </div>
   );
 }

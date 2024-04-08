@@ -39,6 +39,8 @@ export default function Login()
             />
           <div onClick={handleSubmit} className="loginbut" style={{height : 50 , width : 50  }}>Login</div>
         </form>
+
+        <div style={{display : "flex" , marginTop : '20'}}>Don't have account <div style={{marginLeft : 5, color : 'rgb(35,168,201)'}} onClick={()=>{navigate('/signup')}} className="clickhere">Click here</div></div>
       </div>
     );
 }

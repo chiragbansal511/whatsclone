@@ -314,3 +314,7 @@ cursor: pointer;
     /* justify-content: center; */
     align-items: center;
 }
+
+.clickhere:hover{
+    cursor: pointer;
+}

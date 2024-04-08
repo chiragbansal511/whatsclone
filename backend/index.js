@@ -94,7 +94,7 @@ async function sendmessage(receiver, message, sender, res, name, messagetype, me
     }
 
     catch (error) {
-        res.json("error");
+        // res.json("error");
         console.log("errorororo", error)
     }
 
