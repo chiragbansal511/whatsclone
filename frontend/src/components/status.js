@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import socket from '../socket';
+import { useRef } from 'react';
 
 export default function Status() {
 
@@ -11,6 +12,7 @@ export default function Status() {
     const [comment, setComment] = useState([""]);
     const [postImage, setPostImage] = useState("");
     const [newcomment, setNewcomment] = useState("");
+    const profileref = useRef(null);
 
     async function removestatus(sender) {
         console.log("remove")
@@ -25,7 +27,7 @@ export default function Status() {
             setStatuslist(newPrevStatuslist);
             console.log(newPrevStatuslist);
             localStorage.removeItem(`status,${sender.name}`);
-        }, 10*60*1000);
+        }, 10 * 60 * 1000);
     }
 
     async function getstoredofflinestatus() {
@@ -216,6 +218,7 @@ export default function Status() {
         setPostImage({ myFile: base64 });
         console.log(postImage, "postimage");
         console.log(base64);
+        handlestatus();
 
     };
 
@@ -317,13 +320,13 @@ export default function Status() {
         <div className='App1'>
 
             <div className='col2'>
-                <button onClick={handlestatus}>Add status</button>
-                <input type="file" name="" id="" accept='.jpeg , .png , .jpg' onChange={handleFileUpload} />
+                <img onClick={() => { profileref.current.click(); }} src={postImage.myFile} alt="status" style={{ height: "10vh", width: "10vh", borderRadius: 10, backgroundColor: "white", marginTop: 10, marginBottom: 10 }} className='addstatusbut' />
+                <input type="file" name="" id="" accept='.jpeg , .png , .jpg' onChange={handleFileUpload} style={{ display: 'none' }} ref={profileref} />
                 {
                     statuslist != null ? statuslist.map((element, index) => (
                         <div key={index}>
                             {
-                                element != "" ? <button onClick={() => { setSelect(element.sender); setStatus(element.status) }}>{element.sender}</button> : <div></div>
+                                element != "" ? <div className='statuslist' style={{ marginTop: 10, fontWeight: "bold", fontSize: "2.3vh" }} onClick={() => { setSelect(element.sender); setStatus(element.status) }}>{element.sender}</div> : <div></div>
                             }
                         </div>
                     )) : <div></div>
@@ -332,21 +335,31 @@ export default function Status() {
 
             <div className='col3'>
 
-                <img src={status.myFile} alt="status" />
+                <img src={status.myFile} alt="status" style={{ scale: "1", justifySelf: 'start', marginTop: 10 }} />
 
-                comments
+                <div style={{ fontSize: 40, fontWeight: 'bold' }}>comments</div>
 
                 {
                     comment != null ? comment.map((e, index) => (
-                        <div key={index}>
-                            <div> {e.sender}</div>
-                            <div> {e.message}</div>
+                        <div key={index} style={{display : 'flex' , flexDirection : 'column' , width : '75vw' , height : "50vh" , overflow : 'scroll'  , overflowX : 'hidden'}}>
+                            {
+                                e.sender == "you" ? <div style={{alignSelf : 'flex-end' , marginRight : '25px'}}>
+                                    <div> {e.sender}</div>
+                                    <div> {e.message}</div>
+                                </div> :
+                                    <div style={{alignSelf : 'flex-end' , marginLeft : '25px'}}>
+                                        <div> {e.sender}</div>
+                                        <div> {e.message}</div>
+                                    </div>
+                            }
                         </div>
                     )) : <div>no comment</div>
                 }
 
-                <input type="text" value={newcomment} onChange={(e) => setNewcomment(e.target.value)} />
-                <button onClick={sendcomment}>Send</button>
+                <div style={{display : 'flex' , justifyContent : 'center' , alignItems : 'center'}}>
+                <input type="text" value={newcomment} onChange={(e) => setNewcomment(e.target.value)} className='sendmessage'/>
+                <div onClick={sendcomment} className='sendbut'></div>
+                </div>
             </div>
         </div>
     )

@@ -292,7 +292,7 @@ function Home() {
 
             </div>
 
-            <div className={select[2]}  style={{overflow : "scroll" , }}> <div><Sendmessage /></div></div>
+            <div className={select[2]}  style={{overflow : "scroll" , overflowX : 'hidden'}}> <div><Sendmessage /></div></div>
             <div className={select[3]}><div><Status /></div></div>
         </div>
     );

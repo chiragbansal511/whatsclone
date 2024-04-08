@@ -14,7 +14,7 @@ const app = express();
 app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server);
-url = "mongodb+srv://chiragengstu22:12345@whatsapp.avhjkr0.mongodb.net/?retryWrites=true&w=majority&appName=whatsapp";
+const url = "mongodb+srv://chiragengstu22:12345@whatsapp.avhjkr0.mongodb.net/?retryWrites=true&w=majority&appName=whatsapp";
 const client = new MongoClient(url);
 const secretKey = 'your_secret_key';
 const dbName = 'whatsapp';
@@ -62,7 +62,6 @@ async function sendstatus_comment(comment_status , receiver) {
     }
 
     catch (error) {
-        res.json("error");
         console.log("errorororo", error)
     }
 
@@ -184,7 +183,7 @@ app.post(("/signup/verifyopt"), async (req, res) => {
 app.post(("/profilephoto"), authenticateToken, async (req, res) => {
     console.log(req.body.email);
     try {
-        let response = "";
+        let response ;
         req.body.messagefor != "group" ? response = await client.db(dbName).collection("account").findOne({ email: req.body.email }) : response = await client.db(dbName).collection("group").findOne({ name: req.body.email });
         res.json({ profilephoto: response.profilephoto });
 
