@@ -14,7 +14,7 @@ const app = express();
 app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server);
-const url = "mongodb+srv://chiragengstu22:12345@whatsapp.avhjkr0.mongodb.net/?retryWrites=true&w=majority&appName=whatsapp";
+const url ="mongodb://0.0.0.0:27017/";
 const client = new MongoClient(url);
 const secretKey = 'your_secret_key';
 const dbName = 'whatsapp';

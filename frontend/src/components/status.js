@@ -218,8 +218,6 @@ export default function Status() {
         setPostImage({ myFile: base64 });
         console.log(postImage, "postimage");
         console.log(base64);
-        handlestatus();
-
     };
 
 
@@ -273,7 +271,7 @@ export default function Status() {
                     name: data.name
                 }
 
-
+                console.log(comment.name , "name");
                 let prevmessage = localStorage.getItem(`status,${comment.name}`)
                 if (prevmessage != undefined) {
                     prevmessage = JSON.parse(prevmessage);
@@ -289,12 +287,12 @@ export default function Status() {
                 }
                 localStorage.setItem(`status,${comment.name}`, JSON.stringify(prevmessage));
 
+                if (comment.name === select) {
+                    setComment(e => [comment, ...e]);
+                }
+    
             }
-
-            if (comment.name === select) {
-                setComment(e => [comment, ...e]);
-            }
-
+            
             console.log(statuslist);
         };
 
@@ -321,6 +319,7 @@ export default function Status() {
 
             <div className='col2'>
                 <img onClick={() => { profileref.current.click(); }} src={postImage.myFile} alt="status" style={{ height: "10vh", width: "10vh", borderRadius: 10, backgroundColor: "white", marginTop: 10, marginBottom: 10 }} className='addstatusbut' />
+                <div onClick={()=> handlestatus()}>send</div>
                 <input type="file" name="" id="" accept='.jpeg , .png , .jpg' onChange={handleFileUpload} style={{ display: 'none' }} ref={profileref} />
                 {
                     statuslist != null ? statuslist.map((element, index) => (
@@ -336,18 +335,18 @@ export default function Status() {
             <div className='col3'>
 
                 <img src={status.myFile} alt="status" style={{ scale: "1", justifySelf: 'start', marginTop: 10 }} />
-
                 <div style={{ fontSize: 40, fontWeight: 'bold' }}>comments</div>
+                <div style={{ overflow : 'scroll'  , overflowX : 'hidden'}}>
 
                 {
                     comment != null ? comment.map((e, index) => (
-                        <div key={index} style={{display : 'flex' , flexDirection : 'column' , width : '75vw' , height : "50vh" , overflow : 'scroll'  , overflowX : 'hidden'}}>
+                        <div key={index} style={{display : 'flex' , flexDirection : 'column' , width : '75vw'}}>
                             {
-                                e.sender == "you" ? <div style={{alignSelf : 'flex-end' , marginRight : '25px'}}>
+                                e.sender == "you" ? <div style={{alignSelf : 'flex-end' , marginRight : '5px' , marginBottom : "10px"}}>
                                     <div> {e.sender}</div>
                                     <div> {e.message}</div>
                                 </div> :
-                                    <div style={{alignSelf : 'flex-end' , marginLeft : '25px'}}>
+                                    <div style={{alignSelf : 'flex-start' , marginLeft : '5px' , marginBottom : '10px'}}>
                                         <div> {e.sender}</div>
                                         <div> {e.message}</div>
                                     </div>
@@ -355,6 +354,7 @@ export default function Status() {
                         </div>
                     )) : <div>no comment</div>
                 }
+                </div>
 
                 <div style={{display : 'flex' , justifyContent : 'center' , alignItems : 'center'}}>
                 <input type="text" value={newcomment} onChange={(e) => setNewcomment(e.target.value)} className='sendmessage'/>
