@@ -319,7 +319,7 @@ export default function Status() {
 
             <div className='col2'>
                 <img onClick={() => { profileref.current.click(); }} src={postImage.myFile} alt="status" style={{ height: "10vh", width: "10vh", borderRadius: 10, backgroundColor: "white", marginTop: 10, marginBottom: 10 }} className='addstatusbut' />
-                <div onClick={()=> handlestatus()}>send</div>
+                <div onClick={()=> handlestatus()} className="addstatusbutton" ></div>
                 <input type="file" name="" id="" accept='.jpeg , .png , .jpg' onChange={handleFileUpload} style={{ display: 'none' }} ref={profileref} />
                 {
                     statuslist != null ? statuslist.map((element, index) => (
