@@ -276,18 +276,18 @@ export default function Status() {
                 if (prevmessage != undefined) {
                     prevmessage = JSON.parse(prevmessage);
                     prevmessage.push(comment);
-                    if (comment.name === select) {
+                    if (comment.name === Cookies.get("statusselect")) {
                         setComment(e => [...e, comment]);
                     }
                 } else {
                     prevmessage = [comment];
-                    if (comment.name === select) {
+                    if (comment.name === Cookies.get("statusselect")) {
                         setComment([comment]);
                     }
                 }
                 localStorage.setItem(`status,${comment.name}`, JSON.stringify(prevmessage));
-
-                if (comment.name === select) {
+                console.log(comment.name , Cookies.get("statusselect"));
+                if (comment.name === Cookies.get("statusselect")) {
                     setComment(e => [comment, ...e]);
                 }
     
@@ -325,7 +325,7 @@ export default function Status() {
                     statuslist != null ? statuslist.map((element, index) => (
                         <div key={index}>
                             {
-                                element != "" ? <div className='statuslist' style={{ marginTop: 10, fontWeight: "bold", fontSize: "2.3vh" }} onClick={() => { setSelect(element.sender); setStatus(element.status) }}>{element.sender}</div> : <div></div>
+                                element != "" ? <div className='statuslist' style={{ marginTop: 10, fontWeight: "bold", fontSize: "2.3vh" }} onClick={() => { setSelect(element.sender); Cookies.set( "statusselect" , element.sender); setStatus(element.status) }}>{element.sender}</div> : <div></div>
                             }
                         </div>
                     )) : <div></div>
